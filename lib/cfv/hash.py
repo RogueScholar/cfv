@@ -1,37 +1,36 @@
 import os
 import sys
-
 from builtins import object
 
 from cfv import osutil
 
-
 try:
-    if os.environ.get('CFV_NOMMAP'):
+    if os.environ.get("CFV_NOMMAP"):
         raise ImportError
     # mmap is broken in python 2.4.2 and leaks file descriptors
     if sys.version_info[:3] == (2, 4, 2):
         raise ImportError
     import mmap
 
-    def dommap(fileno, len):  # generic mmap.  ACCESS_* args work on both nix and win.
+    # generic mmap.  ACCESS_* args work on both nix and win.
+    def dommap(fileno, len):
         if len == 0:
-            return b''  # mmap doesn't like length=0
+            return b""  # mmap doesn't like length=0
         return mmap.mmap(fileno, len, access=mmap.ACCESS_READ)
 
     _nommap = 0
 except ImportError:
     _nommap = 1
 
-_MAX_MMAP = 2 ** 32 - 1
-_FALLBACK_MMAP = 2 ** 31 - 1
+_MAX_MMAP = 2**32 - 1
+_FALLBACK_MMAP = 2**31 - 1
 
 
 def _getfilechecksum(filename, hasher, callback):
-    if filename == '':
+    if filename == "":
         f = sys.stdin
     else:
-        f = open(filename, 'rb')
+        f = open(filename, "rb")
 
     def finish(m, s):
         while 1:
@@ -78,12 +77,19 @@ except ImportError:
 
 def getfilechecksumgeneric(algo):
     import hashlib
+
     if hasattr(hashlib, algo):
         hasher = getattr(hashlib, algo)
     else:
+
         def hasher():
             return hashlib.new(algo)
-    return lambda filename, callback: _getfilechecksum(filename, hasher, callback), hasher().digest_size
+
+    return (
+        lambda filename, callback: _getfilechecksum(filename, hasher, callback
+                                                    ),
+        hasher().digest_size,
+    )
 
 
 def getfilesha1(filename, callback):
@@ -91,7 +97,7 @@ def getfilesha1(filename, callback):
 
 
 try:
-    if os.environ.get('CFV_NOFCHKSUM'):
+    if os.environ.get("CFV_NOFCHKSUM"):
         raise ImportError
     import fchksum
 
@@ -100,32 +106,35 @@ try:
             raise ImportError
     except Exception:
         # can't use perror yet since config hasn't been done..
-        sys.stderr.write('old fchksum version installed, using std python modules. please update.\n')
+        sys.stderr.write(
+            "old fchksum version installed, using std python modules. please update.\n"
+        )
         raise ImportError
 
     def getfilemd5(filename, callback):
-        if filename == '':
+        if filename == "":
             f = sys.stdin
         else:
-            f = open(filename, 'rb')
+            f = open(filename, "rb")
         if isinstance(filename, str):
-            sname = filename.encode(osutil.fsencoding, 'replace')
+            sname = filename.encode(osutil.fsencoding, "replace")
         else:
             sname = filename
         c, s = fchksum.fmd5(sname, callback, 0.03, fileno=f.fileno())
         return c, s
 
     def getfilecrc(filename, callback):
-        if filename == '':
+        if filename == "":
             f = sys.stdin
         else:
-            f = open(filename, 'rb')
+            f = open(filename, "rb")
         if isinstance(filename, str):
-            sname = filename.encode(osutil.fsencoding, 'replace')
+            sname = filename.encode(osutil.fsencoding, "replace")
         else:
             sname = filename
         c, s = fchksum.fcrc32d(sname, callback, 0.03, fileno=f.fileno())
         return c, s
+
 except ImportError:
     import struct
 
@@ -137,14 +146,14 @@ except ImportError:
     class CRC32(object):
         digest_size = 4
 
-        def __init__(self, s=''):
+        def __init__(self, s=b""):
             self.value = _crc32(s)
 
         def update(self, s):
             self.value = _crc32(s, self.value)
 
         def digest(self):
-            return struct.pack('>I', self.value & 0xFFFFFFFF)
+            return struct.pack(">I", self.value & 0xFFFFFFFF)
 
     def getfilemd5(filename, callback):
         return _getfilechecksum(filename, md5_new, callback)

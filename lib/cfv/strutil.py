@@ -1,10 +1,9 @@
-from future import standard_library
-standard_library.install_aliases()
-from builtins import str
-from builtins import object
-import codecs
 import unicodedata
-from io import StringIO
+from builtins import str
+
+from future import standard_library
+
+standard_library.install_aliases()
 
 
 def safesort(l):
@@ -22,20 +21,20 @@ def safesort(l):
 
 def showfn(s):
     if isinstance(s, bytes):
-        return s.decode('ascii', 'replace')
+        return s.decode("ascii", "replace")
     return s
 
 
 def chomp(line):
-    if line[-2:] == '\r\n':
+    if line[-2:] == "\r\n":
         return line[:-2]
-    elif line[-1:] in '\r\n':
+    elif line[-1:] in "\r\n":
         return line[:-1]
     return line
 
 
 def chompnulls(line):
-    p = line.find('\0')
+    p = line.find(b"\0")
     if p < 0:
         return line
     else:
@@ -50,13 +49,17 @@ def uwidth(u):
     w = 0
     # for c in unicodedata.normalize('NFC', u):
     for c in u:
-        if c in (u'\u0000', u'\u200B'):  # null, ZERO WIDTH SPACE
+        if c in (u"\u0000", u"\u200B"):  # null, ZERO WIDTH SPACE
             continue
         ccat = unicodedata.category(c)
-        if ccat in ('Mn', 'Me', 'Cf'):  # 'Mark, nonspacing', 'Mark, enclosing', 'Other, format'
+        if ccat in (
+                "Mn",
+                "Me",
+                "Cf",
+        ):  # 'Mark, nonspacing', 'Mark, enclosing', 'Other, format'
             continue
         cwidth = unicodedata.east_asian_width(c)
-        if cwidth in ('W', 'F'):  # 'East Asian Wide', 'East Asian Full-width'
+        if cwidth in ("W", "F"):  # 'East Asian Wide', 'East Asian Full-width'
             w += 2
         else:
             w += 1
@@ -71,11 +74,11 @@ def lchoplen(line, max):
     """
     if isinstance(line, bytes):
         if len(line) > max:
-            return b'...' + line[-(max - 3):]
+            return b"..." + line[-(max - 3):]
         return line
     elif len(line) * 2 <= max:
         return line
-    chars = [u'']
+    chars = [u""]
     w = 0
     for c in reversed(line):
         cw = uwidth(c)
@@ -83,13 +86,13 @@ def lchoplen(line, max):
             while w > max - 3:
                 w -= uwidth(chars.pop(0))
             w += 3
-            chars.insert(0, u'...')
+            chars.insert(0, u"...")
             break
         w += cw
         chars[0] = c + chars[0]
         if cw != 0:
-            chars.insert(0, u'')
-    return u''.join(chars)
+            chars.insert(0, u"")
+    return u"".join(chars)
 
 
 def rchoplen(line, max):
@@ -100,18 +103,18 @@ def rchoplen(line, max):
     """
     if isinstance(line, bytes):
         if len(line) > max:
-            return line[:max - 3] + b'...'
+            return line[:max - 3] + b"..."
         return line
     elif len(line) * 2 <= max:
         return line
-    chars = [u'']
+    chars = [u""]
     w = 0
     for c in line:
         cw = uwidth(c)
         if w + cw > max:
             while w > max - 3:
                 w -= uwidth(chars.pop())
-            chars.append(u'...')
+            chars.append(u"...")
             w += 3
             break
         w += cw
@@ -119,4 +122,4 @@ def rchoplen(line, max):
             chars[-1] += c
         else:
             chars.append(c)
-    return u''.join(chars)
+    return u"".join(chars)

@@ -1,26 +1,25 @@
-from future import standard_library
-standard_library.install_aliases()
-from builtins import object
 import codecs
 import sys
-from io import StringIO
+from builtins import object
+from io import BytesIO
 
 from cfv import osutil
-from cfv import strutil
+from future import standard_library
 
+standard_library.install_aliases()
 
-_badbytesmarker = u'\ufffe'
+_badbytesmarker = u"\ufffe"
 
 
 def _markbadbytes(exc):
     return _badbytesmarker, exc.end
 
 
-codecs.register_error('markbadbytes', _markbadbytes)
+codecs.register_error("markbadbytes", _markbadbytes)
 
 
 class PeekFile(object):
-    def __init__(self, fileobj, filename=None, encoding='auto'):
+    def __init__(self, fileobj, filename=None, encoding="auto"):
         self.fileobj = fileobj
         self._init_decodeobj(encoding)
         self.name = filename or fileobj.name
@@ -29,18 +28,18 @@ class PeekFile(object):
         self._encoding = None
         self._decode_start = 0
         self._decode_errs = 0
-        if encoding == 'raw':
+        if encoding == "raw":
             self.decodeobj = self.fileobj
         else:
-            if encoding == 'auto':
+            if encoding == "auto":
                 magic = self.fileobj.read(4)
                 # utf32 are tested first, since utf-32le BOM starts the same as utf-16le's.
-                if magic in (b'\x00\x00\xfe\xff', b'\xff\xfe\x00\x00'):
-                    self._encoding = 'UTF-32'
-                elif magic[:2] in (b'\xfe\xff', b'\xff\xfe'):
-                    self._encoding = 'UTF-16'
-                elif magic.startswith(b'\xef\xbb\xbf'):
-                    self._encoding = 'UTF-8'
+                if magic in (b"\x00\x00\xfe\xff", b"\xff\xfe\x00\x00"):
+                    self._encoding = "UTF-32"
+                elif magic[:2] in (b"\xfe\xff", b"\xff\xfe"):
+                    self._encoding = "UTF-16"
+                elif magic.startswith(b"\xef\xbb\xbf"):
+                    self._encoding = "UTF-8"
                     self._decode_start = 3
             if not self._encoding:
                 self._encoding = osutil.getencoding(encoding)
@@ -49,20 +48,22 @@ class PeekFile(object):
     def _reset_decodeobj(self):
         self.fileobj.seek(self._decode_start)
         if self._encoding:
-            self.decodeobj = codecs.getreader(self._encoding)(self.fileobj, errors='markbadbytes')
+            self.decodeobj = codecs.getreader(self._encoding)(
+                self.fileobj, errors="markbadbytes")
         self._prevlineend = None
 
     def _readline(self, *args):
         line = self.decodeobj.readline(*args)
         # work around corrupted files that have crcrlf line endings.  (With StreamReaders in python versions >= 2.4, you no longer get it all as one line.)
-        if self._prevlineend == '\r' and line == '\r\n':
+        if self._prevlineend == "\r" and line == "\r\n":
             self._prevlineend = None
             return self._readline(*args)
         self._prevlineend = line[-1:]
         if self._encoding:
             badbytecount = line.count(_badbytesmarker)
             if badbytecount:
-                raise UnicodeError('%r codec: %i decode errors' % (self._encoding, badbytecount))
+                raise UnicodeError("%r codec: %i decode errors" %
+                                   (self._encoding, badbytecount))
         return line
 
     def peek(self, *args):
@@ -75,7 +76,7 @@ class PeekFile(object):
             return self.decodeobj.read(*args)
         except UnicodeError:
             self._decode_errs = 1
-            return u''
+            return u""
 
     def peekline(self, *args):
         self._reset_decodeobj()
@@ -83,14 +84,14 @@ class PeekFile(object):
             return self._readline(*args)
         except UnicodeError:
             self._decode_errs = 1
-            return u''
+            return u""
 
     def peeknextline(self, *args):
         try:
             return self._readline(*args)
         except UnicodeError:
             self._decode_errs = 1
-            return u''
+            return u""
 
     def _done_peeking(self, raw):
         if raw:
@@ -123,21 +124,17 @@ class PeekFile(object):
 
 
 def PeekFileNonseekable(fileobj, filename, encoding):
-    return PeekFile(StringIO(fileobj.read()), filename, encoding)
+    return PeekFile(BytesIO(fileobj.read()), filename, encoding)
 
 
 def PeekFileGzip(filename, encoding):
     import gzip
-    if filename == '-':
-        f = gzip.GzipFile(mode='rb', fileobj=StringIO(sys.stdin.read()))  # lovely hack since gzip.py requires a bunch of seeking.. bleh.
+
+    if filename == "-":
+        f = gzip.GzipFile(mode="rb", fileobj=sys.stdin)
     else:
-        f = gzip.open(filename, 'rb')
-    try:
-        f.tell()
-    except (AttributeError, IOError):
-        return PeekFileNonseekable(f, filename, encoding)  # gzip.py prior to python2.2 doesn't support seeking, and prior to 2.0 doesn't support readline(size)
-    else:
-        return PeekFile(f, filename, encoding)
+        f = gzip.open(filename, "rb")
+    return PeekFile(f, filename, encoding)
 
 
 class NoCloseFile(object):
@@ -151,29 +148,40 @@ def open_read(filename, config):
     # don't always know the filetype when opening, just open everything
     # binary.  The text routines should cope with all types of line
     # endings anyway, so this doesn't hurt us.)
-    mode = 'rb'
-    if config.gzip >= 2 or (config.gzip >= 0 and filename[-3:].lower() == '.gz'):
+    mode = "rb"
+    if config.gzip >= 2 or (config.gzip >= 0
+                            and filename[-3:].lower() == ".gz"):
         return PeekFileGzip(filename, config.encoding)
     else:
-        if filename == '-':
+        if filename == "-":
             return PeekFileNonseekable(sys.stdin, filename, config.encoding)
         return PeekFile(open(filename, mode), filename, config.encoding)
 
 
 def open_write(filename, config):
-    if config.encoding == 'raw':
+    if config.encoding == "raw":
         encoding = None
-        mode = 'wb'  # write all files in binary mode. (Otherwise we can run into problems with some encodings, and also with binary files like torrent)
+        # write all files in binary mode. (Otherwise we can run into problems with some encodings, and also with binary files like torrent)
+        mode = "wb"
     else:
         encoding = config.getencoding()
-        mode = 'w'
+        mode = "w"
 
-    if config.gzip >= 2 or (config.gzip >= 0 and filename[-3:].lower() == '.gz'):
+    if config.gzip >= 2 or (config.gzip >= 0
+                            and filename[-3:].lower() == ".gz"):
         import gzip
-        if filename == '-':
-            return gzip.GzipFile(filename=filename, mode=mode, fileobj=sys.stdout)
-        return gzip.open(filename, mode, encoding=encoding)
+        import io
+
+        if filename == "-":
+            res = gzip.GzipFile(filename=filename,
+                                mode=mode,
+                                fileobj=sys.stdout)
+        else:
+            res = gzip.open(filename, mode)
+        if mode == "w":
+            res = io.TextIOWrapper(res, encoding=encoding)
+        return res
     else:
-        if filename == '-':
+        if filename == "-":
             return NoCloseFile(sys.stdout)
         return open(filename, mode, encoding=encoding)
