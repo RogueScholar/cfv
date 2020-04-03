@@ -1,8 +1,8 @@
 #! /usr/bin/env python
-
 import re
 
-from setuptools import find_packages, setup
+from setuptools import find_packages
+from setuptools import setup
 
 RE_VERSION = r"^__version__\s*=\s*'([^']*)'$"
 

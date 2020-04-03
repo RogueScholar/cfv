@@ -7,13 +7,10 @@
 # WITHOUT WARRANTY OF ANY KIND, either express or implied.  See the License
 # for the specific language governing rights and limitations under the
 # License.
-
 # Written by Petru Paler
-
 """bencode.py - bencode encoder + decoder."""
-
-from collections import deque
 import sys
+from collections import deque
 
 try:
     from typing import Dict, List, Tuple, Deque, Union, TextIO, BinaryIO, Any

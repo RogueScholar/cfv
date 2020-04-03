@@ -1,7 +1,6 @@
 import errno
 import os
 import sys
-
 from builtins import object
 from builtins import str
 

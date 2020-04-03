@@ -1,5 +1,4 @@
 #! /usr/bin/env python
-
 #    cfvtest.py - initialization and utility stuff for cfv testing
 #    Copyright (C) 2000-2005  Matthew Mueller <donut AT dakotacom DOT net>
 #
@@ -16,22 +15,22 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program; if not, write to the Free Software
 #    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
-
 from __future__ import print_function
 
-from unittest import main
-from glob import glob
-from doctest import DocTestSuite
-import unittest
-import traceback
-import sys
-import shlex
-import os
-import importlib
-import imp
 import fnmatch
-from builtins import object
+import imp
+import importlib
+import os
+import shlex
+import sys
+import traceback
+import unittest
 from builtins import map
+from builtins import object
+from doctest import DocTestSuite
+from glob import glob
+from unittest import main
+
 from future import standard_library
 
 standard_library.install_aliases()

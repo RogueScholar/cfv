@@ -1,10 +1,8 @@
 # Written by Bram Cohen
 # see LICENSE.txt for license information
-
+from builtins import range
 from collections import OrderedDict
 from re import compile
-
-from builtins import range
 
 
 reg = compile(r"^[^/\\.~][^/\\]*$")

@@ -1,5 +1,4 @@
 #! /usr/bin/env python
-
 #    test.py - tests for cfv (Command-line File Verify)
 #    Copyright (C) 2000-2013  Matthew Mueller <donut AT dakotacom DOT net>
 #    Copyright (C) 2018-2019  David Gnedt <cfv-project AT davizone DOT at>
@@ -17,34 +16,34 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program; if not, write to the Free Software
 #    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
-
 from __future__ import print_function
 
-import cfvtest
-from glob import glob
-from functools import reduce
-import zlib
-import traceback
-import time
-import tempfile
-import sys
-import string
-import stat
-import shutil
-import re
-import os
-import operator
-import locale
-import gzip
 import getopt
+import gzip
 import io
+import locale
+import operator
+import os
+import re
+import shutil
+import stat
+import string
+import sys
+import tempfile
+import time
+import traceback
+import zlib
+from builtins import chr
+from builtins import filter
+from builtins import map
 from builtins import object
 from builtins import range
-from builtins import filter
 from builtins import str
-from builtins import map
 from builtins import zip
-from builtins import chr
+from functools import reduce
+from glob import glob
+
+import cfvtest
 from future import standard_library
 
 standard_library.install_aliases()

@@ -1,8 +1,9 @@
-from cfv import osutil
-from io import BytesIO
-import sys
 import codecs
+import sys
 from builtins import object
+from io import BytesIO
+
+from cfv import osutil
 from future import standard_library
 
 standard_library.install_aliases()

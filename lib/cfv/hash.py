@@ -1,6 +1,5 @@
 import os
 import sys
-
 from builtins import object
 
 from cfv import osutil

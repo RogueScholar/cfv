@@ -1,5 +1,4 @@
 #! /usr/bin/env python
-
 #    cfv - Command-line File Verify
 #    Copyright (C) 2000-2013  Matthew Mueller <donut AT dakotacom DOT net>
 #    Copyright (C) 2018-2019  David Gnedt <cfv-project AT davizone DOT at>
@@ -17,7 +16,6 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program; if not, write to the Free Software
 #    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
-
 from __future__ import division
 from __future__ import print_function
 
@@ -25,6 +23,7 @@ from builtins import map
 from builtins import object
 from builtins import range
 from builtins import str
+
 from past.utils import old_div
 
 __version__ = "2.0.1.dev0"
