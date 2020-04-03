@@ -4,7 +4,6 @@ from builtins import object
 
 from cfv import osutil
 
-
 try:
     if os.environ.get("CFV_NOMMAP"):
         raise ImportError
@@ -23,8 +22,8 @@ try:
 except ImportError:
     _nommap = 1
 
-_MAX_MMAP = 2 ** 32 - 1
-_FALLBACK_MMAP = 2 ** 31 - 1
+_MAX_MMAP = 2**32 - 1
+_FALLBACK_MMAP = 2**31 - 1
 
 
 def _getfilechecksum(filename, hasher, callback):
@@ -87,7 +86,8 @@ def getfilechecksumgeneric(algo):
             return hashlib.new(algo)
 
     return (
-        lambda filename, callback: _getfilechecksum(filename, hasher, callback),
+        lambda filename, callback: _getfilechecksum(filename, hasher, callback
+                                                    ),
         hasher().digest_size,
     )
 
@@ -134,7 +134,6 @@ try:
             sname = filename
         c, s = fchksum.fcrc32d(sname, callback, 0.03, fileno=f.fileno())
         return c, s
-
 
 except ImportError:
     import struct

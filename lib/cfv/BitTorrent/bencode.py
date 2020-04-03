@@ -54,10 +54,10 @@ def decode_int(x, f):
     newf = x.index(b"e", f)
     n = int(x[f:newf])
 
-    if x[f : f + 1] == b"-":
-        if x[f + 1 : f + 2] == b"0":
+    if x[f:f + 1] == b"-":
+        if x[f + 1:f + 2] == b"0":
             raise ValueError
-    elif x[f : f + 1] == b"0" and newf != f + 1:
+    elif x[f:f + 1] == b"0" and newf != f + 1:
         raise ValueError
 
     return n, newf + 1
@@ -81,11 +81,11 @@ def decode_string(x, f, try_decode_utf8=False, force_decode_utf8=False):
     colon = x.index(b":", f)
     n = int(x[f:colon])
 
-    if x[f : f + 1] == b"0" and colon != f + 1:
+    if x[f:f + 1] == b"0" and colon != f + 1:
         raise ValueError
 
     colon += 1
-    s = x[colon : colon + n]
+    s = x[colon:colon + n]
 
     if try_decode_utf8:
         try:
@@ -101,8 +101,8 @@ def decode_list(x, f):
     # type: (bytes, int) -> Tuple[List, int]
     r, f = [], f + 1
 
-    while x[f : f + 1] != b"e":
-        v, f = decode_func[x[f : f + 1]](x, f)
+    while x[f:f + 1] != b"e":
+        v, f = decode_func[x[f:f + 1]](x, f)
         r.append(v)
 
     return r, f + 1
@@ -137,9 +137,12 @@ def decode_dict(x, f, force_sort=True):
 
     r, f = OrderedDict(), f + 1
 
-    while x[f : f + 1] != b"e":
-        k, f = decode_string(x, f, try_decode_utf8=True, force_decode_utf8=True)
-        r[k], f = decode_func[x[f : f + 1]](x, f)
+    while x[f:f + 1] != b"e":
+        k, f = decode_string(x,
+                             f,
+                             try_decode_utf8=True,
+                             force_decode_utf8=True)
+        r[k], f = decode_func[x[f:f + 1]](x, f)
 
     if force_sort:
         r = OrderedDict(sorted(r.items()))
@@ -185,7 +188,8 @@ def bdecode(value):
         raise BencodeDecodeError("not a valid bencoded string")
 
     if l != len(value):
-        raise BencodeDecodeError("invalid bencoded value (data after valid prefix)")
+        raise BencodeDecodeError(
+            "invalid bencoded value (data after valid prefix)")
 
     return r
 
@@ -334,7 +338,8 @@ def bread(fd):
     if isinstance(fd, (bytes, str)):
         with open(fd, "rb") as fd:
             return bdecode(fd.read())
-    elif pathlib is not None and isinstance(fd, (pathlib.Path, pathlib.PurePath)):
+    elif pathlib is not None and isinstance(fd,
+                                            (pathlib.Path, pathlib.PurePath)):
         with open(str(fd), "rb") as fd:
             return bdecode(fd.read())
     else:
@@ -352,7 +357,8 @@ def bwrite(data, fd):
     if isinstance(fd, (bytes, str)):
         with open(fd, "wb") as fd:
             fd.write(bencode(data))
-    elif pathlib is not None and isinstance(fd, (pathlib.Path, pathlib.PurePath)):
+    elif pathlib is not None and isinstance(fd,
+                                            (pathlib.Path, pathlib.PurePath)):
         with open(str(fd), "wb") as fd:
             fd.write(bencode(data))
     else:

@@ -53,9 +53,9 @@ def uwidth(u):
             continue
         ccat = unicodedata.category(c)
         if ccat in (
-            "Mn",
-            "Me",
-            "Cf",
+                "Mn",
+                "Me",
+                "Cf",
         ):  # 'Mark, nonspacing', 'Mark, enclosing', 'Other, format'
             continue
         cwidth = unicodedata.east_asian_width(c)
@@ -74,7 +74,7 @@ def lchoplen(line, max):
     """
     if isinstance(line, bytes):
         if len(line) > max:
-            return b"..." + line[-(max - 3) :]
+            return b"..." + line[-(max - 3):]
         return line
     elif len(line) * 2 <= max:
         return line
@@ -103,7 +103,7 @@ def rchoplen(line, max):
     """
     if isinstance(line, bytes):
         if len(line) > max:
-            return line[: max - 3] + b"..."
+            return line[:max - 3] + b"..."
         return line
     elif len(line) * 2 <= max:
         return line

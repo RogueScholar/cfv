@@ -48,7 +48,6 @@ from future import standard_library
 
 standard_library.install_aliases()
 
-
 if hasattr(locale, "getpreferredencoding"):
     preferredencoding = locale.getpreferredencoding() or "ascii"
 else:
@@ -268,7 +267,7 @@ def test_external(cmd, test):
 
 def test_generic(cmd, test, **kw):
     # s, o = cfvtest.runcfv(cmd)
-    s, o = cfvtest.runcfv(*(cmd,), **kw)
+    s, o = cfvtest.runcfv(*(cmd, ), **kw)
     r = test(s, o)
     test_log_results(cfvtest.cfvenv + cfvtest.cfvfn + " " + cmd, s, o, r, kw)
 
@@ -289,20 +288,16 @@ def cfv_stdin_test(cmd, file):
         if s2:
             raise cst_err(3)
         x = re.search(
-            r"^([^\r\n]*)"
-            + re.escape(file)
-            + r"(.*)$[\r\n]{0,2}^-: (\d+) files, (\d+) OK.  [\d.]+ seconds, [\d.]+K(/s)?$",
+            r"^([^\r\n]*)" + re.escape(file) +
+            r"(.*)$[\r\n]{0,2}^-: (\d+) files, (\d+) OK.  [\d.]+ seconds, [\d.]+K(/s)?$",
             o1,
             re.M | re.DOTALL,
         )
         if not x:
             raise cst_err(4)
         x2 = re.search(
-            r"^"
-            + re.escape(x.group(1))
-            + r"[\t ]*"
-            + re.escape(x.group(2))
-            + r"$[\r\n]{0,2}^-: (\d+) files, (\d+) OK.  [\d.]+ seconds, [\d.]+K(/s)?$",
+            r"^" + re.escape(x.group(1)) + r"[\t ]*" + re.escape(x.group(2)) +
+            r"$[\r\n]{0,2}^-: (\d+) files, (\d+) OK.  [\d.]+ seconds, [\d.]+K(/s)?$",
             o2,
             re.M,
         )
@@ -310,9 +305,8 @@ def cfv_stdin_test(cmd, file):
             raise cst_err(5)
     except cst_err as er:
         r = er
-    test_log_results(
-        "stdin/out of " + cmd + " with file " + file, (s1, s2), o1 + "\n" + o2, r, None
-    )
+    test_log_results("stdin/out of " + cmd + " with file " + file, (s1, s2),
+                     o1 + "\n" + o2, r, None)
 
 
 def cfv_stdin_progress_test(t, file):
@@ -324,35 +318,31 @@ def cfv_stdin_progress_test(t, file):
         try:
             cf1 = os.path.join(dir, "cf1." + t)
             cf2 = os.path.join(dir, "cf2." + t)
-            s1, o1 = cfvtest.runcfv(
-                "%s --progress=yes -C -t %s -f %s %s" % (cfvcmd, t, cf1, file)
-            )
+            s1, o1 = cfvtest.runcfv("%s --progress=yes -C -t %s -f %s %s" %
+                                    (cfvcmd, t, cf1, file))
             if s1:
                 raise cst_err(2)
-            s2, o2 = cfvtest.runcfv(
-                "%s --progress=yes -C -t %s -f %s -" % (cfvcmd, t, cf2), stdin=file
-            )
+            s2, o2 = cfvtest.runcfv("%s --progress=yes -C -t %s -f %s -" %
+                                    (cfvcmd, t, cf2),
+                                    stdin=file)
             if s2:
                 raise cst_err(3)
             if (
-                t != "csv2"
+                    t != "csv2"
             ):  # csv2 has only filesize, hence checksum never happens, so no progress
                 x = re.match(
-                    re.escape(file)
-                    + r" : (\.{20}[-\b.#\\|/]*)[ \r\n]+"
-                    + "\x1b\\[K"
-                    + re.escape(cf1)
-                    + r": (\d+) files, (\d+) OK.  [\d.]+ seconds, [\d.]+K(/s)?$",
+                    re.escape(file) + r" : (\.{20}[-\b.#\\|/]*)[ \r\n]+" +
+                    "\x1b\\[K" + re.escape(cf1) +
+                    r": (\d+) files, (\d+) OK.  [\d.]+ seconds, [\d.]+K(/s)?$",
                     o1,
                     re.M | re.DOTALL,
                 )
                 if not x:
                     raise cst_err(4)
             x2 = re.match(
-                r" : (\.[-\b.#/|\\]*)[\t ]*[ \r\n]+"
-                + "\x1b\\[K"
-                + re.escape(cf2)
-                + r": (\d+) files, (\d+) OK.  [\d.]+ seconds, [\d.]+K(/s)?$",
+                r" : (\.[-\b.#/|\\]*)[\t ]*[ \r\n]+" + "\x1b\\[K" +
+                re.escape(cf2) +
+                r": (\d+) files, (\d+) OK.  [\d.]+ seconds, [\d.]+K(/s)?$",
                 o2,
                 re.M,
             )
@@ -409,24 +399,19 @@ def optionalize(s):
     return "(?:%s)?" % s
 
 
-rx_StatusLine = (
-    rx_Begin
-    + "".join(
-        map(
-            optionalize,
-            [
-                rx_badcrc,
-                rx_badsize,
-                rx_notfound,
-                rx_ferror,
-                rx_unv,
-                rx_cferror,
-                rx_misnamed,
-            ],
-        )
-    )
-    + rx_End
-)
+rx_StatusLine = (rx_Begin + "".join(
+    map(
+        optionalize,
+        [
+            rx_badcrc,
+            rx_badsize,
+            rx_notfound,
+            rx_ferror,
+            rx_unv,
+            rx_cferror,
+            rx_misnamed,
+        ],
+    )) + rx_End)
 
 
 class OneOf(object):
@@ -466,58 +451,68 @@ def tail(s):
 
 def cfv_test(s, o, op=operator.gt, opval=0):
     x = re.search(rx_Begin + rx_End, tail(o))
-    if s == 0 and x and x.group(1) == x.group(2) and op(int(x.group(1)), opval):
+    if s == 0 and x and x.group(1) == x.group(2) and op(
+            int(x.group(1)), opval):
         return 0
     return 1
 
 
-def cfv_substatus_test(
-    s, o, unv=0, notfound=0, badcrc=0, badsize=0, cferror=0, ferror=0
-):
-    expected_status = (
-        (badcrc and 2)
-        | (badsize and 4)
-        | (notfound and 8)
-        | (ferror and 16)
-        | (unv and 32)
-        | (cferror and 64)
-    )
+def cfv_substatus_test(s,
+                       o,
+                       unv=0,
+                       notfound=0,
+                       badcrc=0,
+                       badsize=0,
+                       cferror=0,
+                       ferror=0):
+    expected_status = ((badcrc and 2)
+                       | (badsize and 4)
+                       | (notfound and 8)
+                       | (ferror and 16)
+                       | (unv and 32)
+                       | (cferror and 64))
     if s & expected_status == expected_status and not s & 1:
         return 0
     return "bad status expected %s got %s" % (expected_status, s)
 
 
-def cfv_status_test(s, o, unv=0, notfound=0, badcrc=0, badsize=0, cferror=0, ferror=0):
-    expected_status = (
-        (badcrc and 2)
-        | (badsize and 4)
-        | (notfound and 8)
-        | (ferror and 16)
-        | (unv and 32)
-        | (cferror and 64)
-    )
+def cfv_status_test(s,
+                    o,
+                    unv=0,
+                    notfound=0,
+                    badcrc=0,
+                    badsize=0,
+                    cferror=0,
+                    ferror=0):
+    expected_status = ((badcrc and 2)
+                       | (badsize and 4)
+                       | (notfound and 8)
+                       | (ferror and 16)
+                       | (unv and 32)
+                       | (cferror and 64))
     if s == expected_status:
         return 0
     return "bad status expected %s got %s" % (expected_status, s)
 
 
 def cfv_all_test(
-    s,
-    o,
-    files=-2,
-    ok=0,
-    unv=0,
-    notfound=0,
-    badcrc=0,
-    badsize=0,
-    cferror=0,
-    ferror=0,
-    misnamed=0,
+        s,
+        o,
+        files=-2,
+        ok=0,
+        unv=0,
+        notfound=0,
+        badcrc=0,
+        badsize=0,
+        cferror=0,
+        ferror=0,
+        misnamed=0,
 ):
     x = re.search(rx_StatusLine, tail(o))
     if x:
         if files == -2:
-            files = reduce(operator.add, [ok, badcrc, badsize, notfound, ferror])
+            files = reduce(operator.add,
+                           [ok, badcrc, badsize, notfound, ferror])
         expected = [
             files,
             ok,
@@ -613,11 +608,11 @@ def joincurpath(f):
 
 def cfv_listdata_abs_test(s, o):
     if s == 0 and re.search(
-        "^"
-        + re.escape("\0".join(map(joincurpath, ["data1", "data2", "data3", "data4"])))
-        + "\0$",
-        o,
-        re.I,
+            "^" + re.escape("\0".join(
+                map(joincurpath, ["data1", "data2", "data3", "data4"]))) +
+            "\0$",
+            o,
+            re.I,
     ):
         return 0
     return 1
@@ -630,11 +625,8 @@ def cfv_listdata_unv_test(s, o):
 
 
 def cfv_listdata_bad_test(s, o):
-    if (
-        s & 6
-        and not s & ~6
-        and re.search("^(d2.)?test4.foo\0test.ext.end\0test2.foo\0test3\0$", o, re.I)
-    ):
+    if (s & 6 and not s & ~6 and re.search(
+            "^(d2.)?test4.foo\0test.ext.end\0test2.foo\0test3\0$", o, re.I)):
         return 0
     return 1
 
@@ -643,7 +635,8 @@ def cfv_version_test(s, o):
     x = re.search(r"cfv v([\d.]+(?:\.dev\d+)?) -", o)
     x3 = re.search(
         r" v([\d.]+(?:\.dev\d+)?):",
-        open(os.path.join(cfvtest.testpath, os.pardir, "Changelog")).readline(),
+        open(os.path.join(cfvtest.testpath, os.pardir,
+                          "Changelog")).readline(),
     )
     if x:
         log("cfv: " + x.group(1))
@@ -673,7 +666,7 @@ def cfv_nooutput_test(s, o, expected=0):
     if s != expected:
         return 1
     if o:
-        return "output: %s" % (repr(o),)
+        return "output: %s" % (repr(o), )
     return 0
 
 
@@ -687,9 +680,9 @@ def T_test(f, extra=None):
     # all tests should work with -m
     test_generic(cmd + " -m -T -f test" + f, cfv_test)
 
-    test_generic(
-        cmd + " -T --list0=ok -f test" + f, cfv_listdata_test, stderr="/dev/null"
-    )
+    test_generic(cmd + " -T --list0=ok -f test" + f,
+                 cfv_listdata_test,
+                 stderr="/dev/null")
     test_generic(
         cmd + " -T --showpaths=n-r --list0=ok -f test" + f,
         cfv_listdata_test,
@@ -726,14 +719,12 @@ def T_test(f, extra=None):
         stderr="/dev/null",
     )
     # ensure all verbose stuff goes to stderr:
+    test_generic(cmd + " -v -T --list0=ok -f test" + f,
+                 cfv_listdata_test,
+                 stderr="/dev/null")
     test_generic(
-        cmd + " -v -T --list0=ok -f test" + f, cfv_listdata_test, stderr="/dev/null"
-    )
-    test_generic(
-        cmd
-        + " -v -T --list0=unverified -f test"
-        + f
-        + " unchecked.dat testfix.csv data1",
+        cmd + " -v -T --list0=unverified -f test" + f +
+        " unchecked.dat testfix.csv data1",
         cfv_listdata_unv_test,
         stderr="/dev/null",
     )
@@ -754,7 +745,7 @@ def T_test(f, extra=None):
         return 0
 
     if f.endswith(
-        ".csv2"
+            ".csv2"
     ):  # csv2 has only filesize, hence checksum never happens, so no progress
         test_generic(cmd + " -T --progress=yes -f test" + f, noprogress_test)
     else:
@@ -781,7 +772,9 @@ def gzC_test(f, extra=None, verify=None, t=None, d=None):
         f = os.path.join(tmpd, "test.C." + f + ".gz")
         if extra:
             cmd += " " + extra
-        test_generic("%s -q -C -t %s -zz -f - %s" % (cmd, t, d), status_test, stdout=f2)
+        test_generic("%s -q -C -t %s -zz -f - %s" % (cmd, t, d),
+                     status_test,
+                     stdout=f2)
         test_generic("%s -C -f %s %s" % (cmd, f, d), cfv_test)
 
         try:
@@ -844,9 +837,8 @@ def C_test(f, extra=None, verify=None, t=None, d="data?"):
 
     tmpd = tempfile.mkdtemp()
     try:
-        test_generic(
-            "%s -p %s -C -f %s" % (cmd, tmpd, f), rcurry(cfv_test, operator.eq, 0)
-        )
+        test_generic("%s -p %s -C -f %s" % (cmd, tmpd, f),
+                     rcurry(cfv_test, operator.eq, 0))
     finally:
         os.rmdir(tmpd)
 
@@ -864,7 +856,10 @@ def C_test(f, extra=None, verify=None, t=None, d="data?"):
                 rcurry(cfv_all_test, ok=3),
             )
             test_generic(
-                cfvcmd + " --encoding=%s -v -T -p %s" % (enc, d,),
+                cfvcmd + " --encoding=%s -v -T -p %s" % (
+                    enc,
+                    d,
+                ),
                 rcurry(cfv_all_test, ok=3),
             )
         finally:
@@ -939,14 +934,18 @@ def C_funkynames_test(t):
         try:
             num = create_funkynames(t, d, chr, deep=deep)
             # numencodable = len(filter(lambda fn: os.path.exists(os.path.join(d,fn)), os.listdir(d)))
-            numencodable = len(list(filter(is_fmtencodable, os.listdir(str(d)))))
+            numencodable = len(
+                list(filter(is_fmtencodable, os.listdir(str(d)))))
             # cfv -C, unencodable filenames on disk, ferror on unencodable filename and ignore it
             numunencodable = num - numencodable
             cfn = os.path.join(d, "funky%s.%s" % (deep and "deep" or "", t))
             test_generic(
-                cfvcmd
-                + "%s -v -C -p %s -t %s -f %s" % (deep and " -rr" or "", d, t, cfn),
-                rcurry(cfv_all_test, files=num, ok=numencodable, ferror=numunencodable),
+                cfvcmd + "%s -v -C -p %s -t %s -f %s" %
+                (deep and " -rr" or "", d, t, cfn),
+                rcurry(cfv_all_test,
+                       files=num,
+                       ok=numencodable,
+                       ferror=numunencodable),
             )
             test_generic(
                 cfvcmd + " -v -T -p %s -f %s" % (d, cfn),
@@ -966,9 +965,8 @@ def C_funkynames_test(t):
             # cfv -C, unencodable filenames on disk, with --encoding=<something else> (eg, utf8), should work.
             cfn = os.path.join(d, "funky%s.%s" % (deep and "deep" or "", t))
             test_generic(
-                cfvcmd
-                + "%s --encoding=utf-8 -v -C -p %s -t %s -f %s"
-                % (deep and " -rr" or "", d, t, cfn),
+                cfvcmd + "%s --encoding=utf-8 -v -C -p %s -t %s -f %s" %
+                (deep and " -rr" or "", d, t, cfn),
                 rcurry(cfv_all_test, files=num, ok=num),
             )
             test_generic(
@@ -991,8 +989,8 @@ def C_funkynames_test(t):
             dcfn = os.path.join(d3, "funky3%s.%s" % (deep and "deep" or "", t))
             # cfv -C, undecodable filenames on disk, with --encoding=raw just put everything in like before
             test_generic(
-                cfvcmd
-                + "%s --encoding=raw -v --piece_size_pow2=1 -C -p %s -t %s -f %s"
+                cfvcmd +
+                "%s --encoding=raw -v --piece_size_pow2=1 -C -p %s -t %s -f %s"
                 % (deep and " -rr" or "", d3, t, dcfn),
                 rcurry(cfv_all_test, files=cnum, ok=cnum),
             )
@@ -1038,19 +1036,20 @@ def C_funkynames_test(t):
                     renamelist.append((fn, newfn))
                     os.rename(os.path.join(d3, fn), os.path.join(d3, newfn))
                     if deep:
-                        os.rename(
-                            os.path.join(d3, newfn, fn), os.path.join(d3, newfn, newfn)
-                        )
+                        os.rename(os.path.join(d3, newfn, fn),
+                                  os.path.join(d3, newfn, newfn))
                     numrenamed += 1
                 # cfv -T, correct filenames on disk, undecodable filenames in CF: check with -s, with --encoding=raw, read CF as raw strings and be happy
                 if t != "torrent":
                     test_generic(
-                        cfvcmd + " --encoding=raw -v -s -T -p %s -f %s" % (d3, dcfn),
+                        cfvcmd + " --encoding=raw -v -s -T -p %s -f %s" %
+                        (d3, dcfn),
                         rcurry(cfv_all_test, ok=cnum, misnamed=numrenamed),
                     )
                 if fmt_hassize(t):
                     test_generic(
-                        cfvcmd + " --encoding=raw -v -m -s -T -p %s -f %s" % (d3, dcfn),
+                        cfvcmd + " --encoding=raw -v -m -s -T -p %s -f %s" %
+                        (d3, dcfn),
                         rcurry(cfv_all_test, ok=cnum, misnamed=numrenamed),
                     )
 
@@ -1059,18 +1058,17 @@ def C_funkynames_test(t):
                 ulist = os.listdir(str(d3))
                 okcnum = len(list(filter(is_fmtencodable, ulist)))
                 numerr = len(ulist) - okcnum
-                dcfn = os.path.join(d3, "funky3%s2.%s" % (deep and "deep" or "", t))
+                dcfn = os.path.join(
+                    d3, "funky3%s2.%s" % (deep and "deep" or "", t))
                 test_generic(
-                    cfvcmd
-                    + "%s -v -C -p %s -t %s -f %s"
-                    % (deep and " -rr" or "", d3, t, dcfn),
+                    cfvcmd + "%s -v -C -p %s -t %s -f %s" %
+                    (deep and " -rr" or "", d3, t, dcfn),
                     rcurry(cfv_all_test, ok=okcnum, ferror=numerr),
                 )
                 for fn, newfn in renamelist:
                     if deep:
-                        os.rename(
-                            os.path.join(d3, newfn, newfn), os.path.join(d3, newfn, fn)
-                        )
+                        os.rename(os.path.join(d3, newfn, newfn),
+                                  os.path.join(d3, newfn, fn))
                     os.rename(os.path.join(d3, newfn), os.path.join(d3, fn))
                 # cfv -T, undecodable filenames on disk, correct filenames in chksum file. want to check with -s, fix with -sn
                 if fmt_hassize(t):
@@ -1086,7 +1084,9 @@ def C_funkynames_test(t):
                     if fmt_hascrc(t):
                         test_generic(
                             cfvcmd + " -v -s -n -T -p %s -f %s" % (d3, dcfn),
-                            rcurry(cfv_all_test, ok=okcnum, misnamed=numrenamed),
+                            rcurry(cfv_all_test,
+                                   ok=okcnum,
+                                   misnamed=numrenamed),
                         )
                         test_generic(
                             cfvcmd + " -v -T -p %s -f %s" % (d3, dcfn),
@@ -1099,13 +1099,15 @@ def C_funkynames_test(t):
         try:
             cnum = create_funkynames(t, d3, chr, deep=deep)
             ulist = os.listdir(str(d3))
-            okcnum = len(list(filter(is_fmtokfn, list(filter(is_fmtencodable, ulist)))))
+            okcnum = len(
+                list(filter(is_fmtokfn, list(filter(is_fmtencodable, ulist)))))
             numerr = len(ulist) - okcnum
-            dcfn = os.path.join(d3, "funky3%s3.%s" % (deep and "deep" or "", t))
+            dcfn = os.path.join(d3,
+                                "funky3%s3.%s" % (deep and "deep" or "", t))
             # cfv -C, undecodable(and/or unencodable) filenames on disk: without raw, ferror on undecodable filename and ignore it
             test_generic(
-                cfvcmd
-                + "%s -v -C -p %s -t %s -f %s" % (deep and " -rr" or "", d3, t, dcfn),
+                cfvcmd + "%s -v -C -p %s -t %s -f %s" %
+                (deep and " -rr" or "", d3, t, dcfn),
                 rcurry(cfv_all_test, files=cnum, ok=okcnum, ferror=numerr),
             )
             test_generic(
@@ -1175,18 +1177,16 @@ def ren_test(f, extra=None, verify=None, t=None):
             cfv_listdata_bad_test,
             stderr="/dev/null",
         )
-        test_generic(
-            basecmd + " --showpaths=0 -q -T --list0=bad", cfv_listdata_bad_test
-        )
+        test_generic(basecmd + " --showpaths=0 -q -T --list0=bad",
+                     cfv_listdata_bad_test)
         test_generic("%s -Tn" % cmd, cfv_bad_test)
         flsw(b"11")
         test_generic("%s -Tn" % cmd, cfv_bad_test)
         flsw(b"123")
         test_generic("%s -Tn" % cmd, cfv_bad_test)
         flsw(b"63")
-        test_generic(
-            cmd + ' --renameformat="%(fullname)s" -Tn', cfv_bad_test
-        )  # test for formats without count too
+        test_generic(cmd + ' --renameformat="%(fullname)s" -Tn',
+                     cfv_bad_test)  # test for formats without count too
         flsw(b"hello")
         test_generic("%s -Tn" % cmd, cfv_test)
         flscmp(b"1", 0, flsf)
@@ -1217,9 +1217,8 @@ def search_test(t, test_nocrc=0, extra=None):
         try:
             for n, n2 in zip(list(range(1, 5)), list(range(4, 0, -1))):
                 shutil.copyfile("data%s" % n, os.path.join(d, "fOoO%s" % n2))
-            test_generic(
-                cmd + " -v -T -p %s -f %s" % (d, cfn), rcurry(cfv_all_test, notfound=4)
-            )
+            test_generic(cmd + " -v -T -p %s -f %s" % (d, cfn),
+                         rcurry(cfv_all_test, notfound=4))
             test_generic(
                 cmd + " -v -s -T -p %s -f %s" % (d, cfn),
                 rcurry(cfv_all_test, notfound=4),
@@ -1245,27 +1244,22 @@ def search_test(t, test_nocrc=0, extra=None):
                 return str((o.count("fOoO3"), o.count("fOoO4")))
             return cfv_all_test(s, o, ok=4, misnamed=4)
 
-        test_generic(
-            cmd + " -v -s -T -p %s -f %s" % (d, cfn), rcurry(cfv_all_test, notfound=4)
-        )
+        test_generic(cmd + " -v -s -T -p %s -f %s" % (d, cfn),
+                     rcurry(cfv_all_test, notfound=4))
         for n, n2 in zip(list(range(1, 5)), list(range(4, 0, -1))):
             shutil.copyfile("data%s" % n, os.path.join(d, "fOoO%s" % n2))
-        test_generic(
-            cmd + " -v -T -p %s -f %s" % (d, cfn), rcurry(cfv_all_test, notfound=4)
-        )
-        test_generic(
-            cmd + " -v -s -T -p %s -f %s" % (d, cfn), dont_find_same_file_twice_test
-        )
-        test_generic(
-            cmd + " -v -T -p %s -f %s" % (d, cfn), rcurry(cfv_all_test, notfound=4)
-        )
+        test_generic(cmd + " -v -T -p %s -f %s" % (d, cfn),
+                     rcurry(cfv_all_test, notfound=4))
+        test_generic(cmd + " -v -s -T -p %s -f %s" % (d, cfn),
+                     dont_find_same_file_twice_test)
+        test_generic(cmd + " -v -T -p %s -f %s" % (d, cfn),
+                     rcurry(cfv_all_test, notfound=4))
         test_generic(
             cmd + " -v -n -s -T -p %s -f %s" % (d, cfn),
             rcurry(cfv_all_test, ok=4, misnamed=4),
         )
-        test_generic(
-            cmd + " -v -u -T -p %s -f %s" % (d, cfn), rcurry(cfv_all_test, ok=4)
-        )
+        test_generic(cmd + " -v -u -T -p %s -f %s" % (d, cfn),
+                     rcurry(cfv_all_test, ok=4))
     finally:
         shutil.rmtree(d)
 
@@ -1285,9 +1279,8 @@ def search_test(t, test_nocrc=0, extra=None):
         else:  # if hascrc:
             experrs = {"badcrc": 3}
 
-        test_generic(
-            cmd + " -v -s -T -p %s -f %s" % (d, cfn), rcurry(cfv_all_test, notfound=4)
-        )
+        test_generic(cmd + " -v -s -T -p %s -f %s" % (d, cfn),
+                     rcurry(cfv_all_test, notfound=4))
         for n, n2 in zip([1, 3, 4], [4, 2, 1]):
             shutil.copyfile("data%s" % n, os.path.join(d, "data%s" % n2))
         test_generic(
@@ -1306,9 +1299,8 @@ def search_test(t, test_nocrc=0, extra=None):
             cmd + " -v -n -s -T -p %s -f %s" % (d, cfn),
             rcurry(cfv_all_test, ok=4, misnamed=misnamed2),
         )
-        test_generic(
-            cmd + " -v -u -T -p %s -f %s" % (d, cfn), rcurry(cfv_all_test, ok=4)
-        )
+        test_generic(cmd + " -v -u -T -p %s -f %s" % (d, cfn),
+                     rcurry(cfv_all_test, ok=4))
     finally:
         shutil.rmtree(d)
 
@@ -1324,9 +1316,8 @@ def search_test(t, test_nocrc=0, extra=None):
                 cmd + " -v -s -T -p %s -f %s" % (d, cfn),
                 rcurry(cfv_all_test, ok=1, misnamed=1, notfound=3),
             )
-            test_generic(
-                cmd + " -v -T -p %s -f %s" % (d, cfn), rcurry(cfv_all_test, notfound=4)
-            )
+            test_generic(cmd + " -v -T -p %s -f %s" % (d, cfn),
+                         rcurry(cfv_all_test, notfound=4))
             test_generic(
                 cmd + " -v -n -s -T -p %s -f %s" % (d, cfn),
                 rcurry(cfv_all_test, ok=1, misnamed=1, notfound=3),
@@ -1351,19 +1342,31 @@ def search_test(t, test_nocrc=0, extra=None):
         os.chmod(d, stat.S_IRUSR | stat.S_IXUSR)
         try:
             os.rename(os.path.join(d, "foo"), os.path.join(d, "foo2"))
-            print("rename of open file in read-only dir worked?  skipping this test.")
+            print(
+                "rename of open file in read-only dir worked?  skipping this test."
+            )
         except EnvironmentError:
             # if the rename failed, then we're good to go for these tests..
             test_generic(
                 cmd + " -v -n -s -T -p %s -f %s" % (d, cfn),
-                rcurry(cfv_all_test, files=4, ok=1, misnamed=1, ferror=1, notfound=3),
+                rcurry(cfv_all_test,
+                       files=4,
+                       ok=1,
+                       misnamed=1,
+                       ferror=1,
+                       notfound=3),
             )
             os.chmod(d, stat.S_IRWXU)
             fdata4 = writefile_and_reopen(os.path.join(d, "data4"), "")
             os.chmod(d, stat.S_IRUSR | stat.S_IXUSR)
             test_generic(
                 cmd + " -v -n -s -T -p %s -f %s" % (d, cfn),
-                rcurry(cfv_all_test, files=4, ok=1, misnamed=1, ferror=2, notfound=3),
+                rcurry(cfv_all_test,
+                       files=4,
+                       ok=1,
+                       misnamed=1,
+                       ferror=2,
+                       notfound=3),
             )
     finally:
         os.chmod(d, stat.S_IRWXU)
@@ -1393,15 +1396,23 @@ def search_test(t, test_nocrc=0, extra=None):
             experrs = {"badcrc": 1}
         test_generic(
             cmd + " -v -uu -s -T -p %s -f %s" % (d, cfn),
-            rcurry(
-                cfv_all_test, files=4, ok=1, misnamed=0, notfound=2, unv=0, **experrs
-            ),
+            rcurry(cfv_all_test,
+                   files=4,
+                   ok=1,
+                   misnamed=0,
+                   notfound=2,
+                   unv=0,
+                   **experrs),
         )
         test_generic(
             cmd + " -v -uu -s -n -T -p %s -f %s" % (d, cfn),
-            rcurry(
-                cfv_all_test, files=4, ok=1, misnamed=0, notfound=2, unv=1, **experrs
-            ),
+            rcurry(cfv_all_test,
+                   files=4,
+                   ok=1,
+                   misnamed=0,
+                   notfound=2,
+                   unv=1,
+                   **experrs),
         )
     finally:
         shutil.rmtree(d)
@@ -1413,7 +1424,8 @@ def search_test(t, test_nocrc=0, extra=None):
             dcfn = os.path.join(d, "deep." + t)
             os.mkdir(os.path.join(d, "aOeU.AoEu"))
             os.mkdir(os.path.join(d, "aOeU.AoEu", "boO.FaRr"))
-            shutil.copyfile("data1", os.path.join(d, "aOeU.AoEu", "boO.FaRr", "DaTa1"))
+            shutil.copyfile("data1",
+                            os.path.join(d, "aOeU.AoEu", "boO.FaRr", "DaTa1"))
             test_generic(
                 cmd + " -v -rr -C -p %s -t %s -f %s" % (d, t, dcfn),
                 rcurry(cfv_all_test, files=1, ok=1),
@@ -1422,7 +1434,8 @@ def search_test(t, test_nocrc=0, extra=None):
                 os.path.join(d, "aOeU.AoEu", "boO.FaRr", "DaTa1"),
                 os.path.join(d, "aOeU.AoEu", "boO.FaRr", "Foo1"),
             )
-            shutil.copyfile("data4", os.path.join(d, "aOeU.AoEu", "boO.FaRr", "DaTa1"))
+            shutil.copyfile("data4",
+                            os.path.join(d, "aOeU.AoEu", "boO.FaRr", "DaTa1"))
             test_generic(
                 cmd + " -v -s -T -p %s -f %s" % (d, dcfn),
                 rcurry(cfv_all_test, files=1, ok=1, misnamed=1),
@@ -1430,8 +1443,10 @@ def search_test(t, test_nocrc=0, extra=None):
             shutil.rmtree(os.path.join(d, "aOeU.AoEu"))
             os.mkdir(os.path.join(d, "AoEu.aOeU"))
             os.mkdir(os.path.join(d, "AoEu.aOeU", "BOo.fArR"))
-            shutil.copyfile("data4", os.path.join(d, "AoEu.aOeU", "BOo.fArR", "dAtA1"))
-            shutil.copyfile("data1", os.path.join(d, "AoEu.aOeU", "BOo.fArR", "Foo1"))
+            shutil.copyfile("data4",
+                            os.path.join(d, "AoEu.aOeU", "BOo.fArR", "dAtA1"))
+            shutil.copyfile("data1",
+                            os.path.join(d, "AoEu.aOeU", "BOo.fArR", "Foo1"))
             test_generic(
                 cmd + " -i -v -s -T -p %s -f %s" % (d, dcfn),
                 rcurry(cfv_all_test, files=1, ok=1, misnamed=1),
@@ -1472,15 +1487,15 @@ def search_test(t, test_nocrc=0, extra=None):
 
             def dont_find_dir_test(s, o):
                 if not o.count("idth") == 1:
-                    return str((o.count("idth"),))
+                    return str((o.count("idth"), ))
                 return cfv_all_test(s, o, ok=0, notfound=1)
 
             # test not finding non-file things in normal mode
-            test_generic(cmd + " -v -m -T -p %s -f %s" % (d, dcfn), dont_find_dir_test)
+            test_generic(cmd + " -v -m -T -p %s -f %s" % (d, dcfn),
+                         dont_find_dir_test)
             # test not finding non-file things in search mode
-            test_generic(
-                cmd + " -v -m -s -T -p %s -f %s" % (d, dcfn), dont_find_dir_test
-            )
+            test_generic(cmd + " -v -m -s -T -p %s -f %s" % (d, dcfn),
+                         dont_find_dir_test)
         finally:
             shutil.rmtree(d)
 
@@ -1490,16 +1505,14 @@ def quoted_search_test():
     try:
         join = os.path.join
         with open(join(d, "foo.sfv"), "w") as f:
-            f.write(
-                r""""data1" B2A9E441
+            f.write(r""""data1" B2A9E441
 "/data4" FA323C6D
 "aa1/data1" B2A9E441
 "c:/aa1/data4" FA323C6D
 "aa3/data3" 841ADFA2
 "\aa3\data4" FA323C6D
 "c:\aa4\bb4\data1" B2A9E441
-"aa4/bb4/data4" FA323C6D"""
-            )
+"aa4/bb4/data4" FA323C6D""")
         shutil.copyfile("data1", pathjoin_and_mkdir(d, "foo1"))
         shutil.copyfile("data4", pathjoin_and_mkdir(d, "foo4"))
         shutil.copyfile("data1", pathjoin_and_mkdir(d, "aa1", "foo1"))
@@ -1509,7 +1522,8 @@ def quoted_search_test():
         shutil.copyfile("data1", pathjoin_and_mkdir(d, "aa4", "bb4", "foo1"))
         shutil.copyfile("data4", pathjoin_and_mkdir(d, "aa4", "bb4", "foo4"))
         test_generic(
-            cfvcmd + r" -v --unquote=yes --strippaths=0 --fixpaths \\/ -s -T -p " + d,
+            cfvcmd +
+            r" -v --unquote=yes --strippaths=0 --fixpaths \\/ -s -T -p " + d,
             rcurry(cfv_all_test, ok=8, misnamed=8),
         )
     finally:
@@ -1524,16 +1538,18 @@ def symlink_test():
         os.mkdir(os.path.join(dir, dir1))
         os.mkdir(os.path.join(dir, dir2))
         if hasattr(os, "symlink"):
-            os.symlink(os.path.join(os.pardir, dir2), os.path.join(dir, dir1, "l2"))
-            os.symlink(os.path.join(os.pardir, dir1), os.path.join(dir, dir2, "l1"))
-            test_generic(cfvcmd + " -l -r -p " + dir, rcurry(cfv_test, operator.eq, 0))
-            test_generic(cfvcmd + " -L -r -p " + dir, rcurry(cfv_test, operator.eq, 0))
-            test_generic(
-                cfvcmd + " -l -r -C -p " + dir, rcurry(cfv_test, operator.eq, 0)
-            )
-            test_generic(
-                cfvcmd + " -L -r -C -p " + dir, rcurry(cfv_test, operator.eq, 0)
-            )
+            os.symlink(os.path.join(os.pardir, dir2),
+                       os.path.join(dir, dir1, "l2"))
+            os.symlink(os.path.join(os.pardir, dir1),
+                       os.path.join(dir, dir2, "l1"))
+            test_generic(cfvcmd + " -l -r -p " + dir,
+                         rcurry(cfv_test, operator.eq, 0))
+            test_generic(cfvcmd + " -L -r -p " + dir,
+                         rcurry(cfv_test, operator.eq, 0))
+            test_generic(cfvcmd + " -l -r -C -p " + dir,
+                         rcurry(cfv_test, operator.eq, 0))
+            test_generic(cfvcmd + " -L -r -C -p " + dir,
+                         rcurry(cfv_test, operator.eq, 0))
 
         open(os.path.join(dir, dir1, "foo"), "w").close()
         open(os.path.join(dir, dir2, "bar"), "w").close()
@@ -1583,18 +1599,18 @@ def deep_unverified_test():
         e2_e2u = join(e2, "e2u")
 
         for d in (
-            a,
-            a_C,
-            B,
-            B_ushallow,
-            B_ushallow_d,
-            u,
-            u_u2,
-            e,
-            e_es,
-            e2,
-            e2_e2s,
-            e2_e2u,
+                a,
+                a_C,
+                B,
+                B_ushallow,
+                B_ushallow_d,
+                u,
+                u_u2,
+                e,
+                e_es,
+                e2,
+                e2_e2s,
+                e2_e2u,
         ):
             os.mkdir(join(dir, d))
         datafns = (
@@ -1660,8 +1676,8 @@ def deep_unverified_test():
         test_generic(cfvcmd + " -i -u -p " + dir, r_unv_test)
         test_generic(cfvcmd + " -i -uu -p " + dir, r_unv_verbose_test)
         test_generic(
-            cfvcmd + " -i -U -p " + dir + " " + " ".join(lower_datafns), r_test
-        )
+            cfvcmd + " -i -U -p " + dir + " " + " ".join(lower_datafns),
+            r_test)
         test_generic(
             cfvcmd + " -i -u -p " + dir + " " + " ".join(lower_datafns),
             r_unv_verbose_test,
@@ -1709,8 +1725,8 @@ def test_encoding_detection():
             if fmt_istext(t):
                 utf8cfn = os.path.join(d, "utf8nobom." + t)
                 test_generic(
-                    cfvcmd
-                    + " -C --encoding=utf-8 -p %s -t %s -f %s" % (datad, t, utf8cfn),
+                    cfvcmd + " -C --encoding=utf-8 -p %s -t %s -f %s" %
+                    (datad, t, utf8cfn),
                     rcurry(cfv_all_test, ok=fnok),
                 )
                 chksumdata = str(readfile(utf8cfn), "utf-8")
@@ -1722,7 +1738,8 @@ def test_encoding_detection():
                         pass
                     else:
                         test_generic(
-                            cfvcmd + " -T -p %s -t %s -f %s" % (datad, t, bommedcfn),
+                            cfvcmd + " -T -p %s -t %s -f %s" %
+                            (datad, t, bommedcfn),
                             rcurry(cfv_all_test, ok=fnok),
                         )
                         test_generic(
@@ -1774,12 +1791,10 @@ def test_encoding2():
                 shutil.copyfile(srcfn, os.path.join(bakad, destfn))
             except (EnvironmentError, UnicodeError):
                 pass
-        test_generic(
-            cfvcmd + " -q -m -T -p " + d, rcurry(cfv_status_test, ferror=fnerrs)
-        )
-        test_generic(
-            cfvcmd + " -v -m -T -p " + d, rcurry(cfv_all_test, ok=fnok, ferror=fnerrs)
-        )
+        test_generic(cfvcmd + " -q -m -T -p " + d,
+                     rcurry(cfv_status_test, ferror=fnerrs))
+        test_generic(cfvcmd + " -v -m -T -p " + d,
+                     rcurry(cfv_all_test, ok=fnok, ferror=fnerrs))
         test_generic(
             cfvcmd + " -v -m -u -T -p " + d,
             rcurry(cfv_all_test, ok=fnok, ferror=fnerrs, unv=0),
@@ -1788,16 +1803,19 @@ def test_encoding2():
             # if some of the files can't be found, checking of remaining files will fail due to missing pieces
             test_generic(cfvcmd + " -q -T -p " + d, rcurry(cfv_status_test))
             test_generic(cfvcmd + " -v -T -p " + d, rcurry(cfv_all_test, ok=4))
-            test_generic(
-                cfvcmd + " -v -u -T -p " + d, rcurry(cfv_all_test, ok=4, unv=0)
-            )
+            test_generic(cfvcmd + " -v -u -T -p " + d,
+                         rcurry(cfv_all_test, ok=4, unv=0))
 
         raw_fnok = 0
         files_fnok = files_fnerrs = 0
         raw_files_fnok = raw_files_fnerrs = 0
-        dirn = list(filter(lambda s: not s.endswith("torrent"), os.listdir(d)))[0]
+        dirn = list(filter(lambda s: not s.endswith("torrent"),
+                           os.listdir(d)))[0]
         try:
-            files = [os.path.join(dirn, s) for s in os.listdir(os.path.join(d, dirn))]
+            files = [
+                os.path.join(dirn, s)
+                for s in os.listdir(os.path.join(d, dirn))
+            ]
         except EnvironmentError:
             files = []
         else:
@@ -1836,12 +1854,14 @@ def test_encoding2():
                     rcurry(cfv_all_test, ok=files_fnok, notfound=files_fnerrs),
                 )
             test_generic(
-                cfvcmd + " --encoding=raw -v -m -T -p " + d + " " + " ".join(files),
+                cfvcmd + " --encoding=raw -v -m -T -p " + d + " " +
+                " ".join(files),
                 rcurry(cfv_all_test, ok=raw_files_fnok),
             )
             if raw_files_fnok == len(datafns):
                 test_generic(
-                    cfvcmd + " --encoding=raw -v -T -p " + d + " " + " ".join(files),
+                    cfvcmd + " --encoding=raw -v -T -p " + d + " " +
+                    " ".join(files),
                     rcurry(cfv_all_test, ok=raw_files_fnok),
                 )
 
@@ -1851,7 +1871,10 @@ def test_encoding2():
         )
         test_generic(
             cfvcmd + " --encoding=raw -m -v -u -T -p " + d,
-            rcurry(cfv_all_test, ok=raw_fnok, unv=fnok - raw_fnok, notfound=raw_fnerrs),
+            rcurry(cfv_all_test,
+                   ok=raw_fnok,
+                   unv=fnok - raw_fnok,
+                   notfound=raw_fnerrs),
         )
         if raw_fnok == len(datafns):
             test_generic(
@@ -1860,9 +1883,10 @@ def test_encoding2():
             )
             test_generic(
                 cfvcmd + " --encoding=raw -v -u -T -p " + d,
-                rcurry(
-                    cfv_all_test, ok=raw_fnok, unv=fnok - raw_fnok, notfound=raw_fnerrs
-                ),
+                rcurry(cfv_all_test,
+                       ok=raw_fnok,
+                       unv=fnok - raw_fnok,
+                       notfound=raw_fnerrs),
             )
     except Exception:
         # yuck.  I really should switch this crap all to unittest ...
@@ -1884,12 +1908,13 @@ def largefile2GB_test():
     f = open(fn, "wb")
     try:
         f.write("hi")
-        f.seek(2 ** 30)
+        f.seek(2**30)
         f.write("foo")
-        f.seek(2 ** 31)
+        f.seek(2**31)
         f.write("bar")
         f.close()
-        test_generic(cfvcmd + " -v -T -p %s" % "bigfile2", rcurry(cfv_all_test, ok=6))
+        test_generic(cfvcmd + " -v -T -p %s" % "bigfile2",
+                     rcurry(cfv_all_test, ok=6))
     finally:
         os.unlink(fn)
 
@@ -1900,14 +1925,15 @@ def largefile4GB_test():
     f = open(fn, "wb")
     try:
         f.write("hi")
-        f.seek(2 ** 30)
+        f.seek(2**30)
         f.write("foo")
-        f.seek(2 ** 31)
+        f.seek(2**31)
         f.write("bar")
-        f.seek(2 ** 32)
+        f.seek(2**32)
         f.write("baz")
         f.close()
-        test_generic(cfvcmd + " -v -T -p %s" % "bigfile", rcurry(cfv_all_test, ok=10))
+        test_generic(cfvcmd + " -v -T -p %s" % "bigfile",
+                     rcurry(cfv_all_test, ok=10))
     finally:
         os.unlink(fn)
 
@@ -1929,12 +1955,10 @@ def manyfiles_test(t):
             with open(os.path.join(d, n), "w") as f:
                 f.write(n)
         cfn = os.path.join(d, "manyfiles." + t)
-        test_generic(
-            cfvcmd + " -C -p %s -t %s -f %s" % (d, t, cfn), rcurry(cfv_all_test, ok=num)
-        )
-        test_generic(
-            cfvcmd + " -T -p %s -f %s" % (d, cfn), rcurry(cfv_all_test, ok=num)
-        )
+        test_generic(cfvcmd + " -C -p %s -t %s -f %s" % (d, t, cfn),
+                     rcurry(cfv_all_test, ok=num))
+        test_generic(cfvcmd + " -T -p %s -f %s" % (d, cfn),
+                     rcurry(cfv_all_test, ok=num))
     finally:
         shutil.rmtree(d)
 
@@ -1967,9 +1991,10 @@ def specialfile_test(cfpath):
                 time.sleep(0.1)
                 f.write("c" * 0x4000)
 
-        t = threading.Thread(target=pusher, args=(fpath,))
+        t = threading.Thread(target=pusher, args=(fpath, ))
         t.start()
-        s, o = cfvtest.runcfv("%s --progress=yes -T -p %s -f %s" % (cfvcmd, d, cfn))
+        s, o = cfvtest.runcfv("%s --progress=yes -T -p %s -f %s" %
+                              (cfvcmd, d, cfn))
         t.join()
         r = 0
         if s:
@@ -2018,16 +2043,15 @@ def private_torrent_test():
         f = os.path.join(tmpd, "test.torrent")
         test_generic("%s -C -f %s data1" % (cmd, f), cfv_test)
         data = readfile(f)
-        test_log_results(
-            "should not contain private flag", 0, repr(data), needle in data, None
-        )
+        test_log_results("should not contain private flag", 0, repr(data),
+                         needle in data, None)
 
         f = os.path.join(tmpd, "test2.torrent")
-        test_generic("%s --private_torrent -C -f %s data1" % (cmd, f), cfv_test)
+        test_generic("%s --private_torrent -C -f %s data1" % (cmd, f),
+                     cfv_test)
         data = readfile(f)
-        test_log_results(
-            "should contain private flag", 0, repr(data), needle not in data, None
-        )
+        test_log_results("should contain private flag", 0, repr(data),
+                         needle not in data, None)
     finally:
         shutil.rmtree(tmpd)
 
@@ -2042,10 +2066,12 @@ def all_unittest_tests():
     runner = TextTestRunner(stream=logfile, descriptions=1, verbosity=2)
     result = runner.run(suite)
     if not result.wasSuccessful():
-        r = "%i failures, %i errors" % tuple(map(len, (result.failures, result.errors)))
+        r = "%i failures, %i errors" % tuple(
+            map(len, (result.failures, result.errors)))
     else:
         r = 0
-    test_log_finish("all_unittests_suite", not result.wasSuccessful(), r, None, None)
+    test_log_finish("all_unittests_suite", not result.wasSuccessful(), r, None,
+                    None)
 
     return len(result.failures) + len(result.errors)
 
@@ -2074,9 +2100,8 @@ def show_help_and_exit(err=None):
 
 
 try:
-    optlist, args = getopt.getopt(
-        sys.argv[1:], "ie", ["long", "help", "unit", "exit-early"]
-    )
+    optlist, args = getopt.getopt(sys.argv[1:], "ie",
+                                  ["long", "help", "unit", "exit-early"])
 except getopt.error as e:
     show_help_and_exit(e)
 
@@ -2099,7 +2124,6 @@ for o, a in optlist:
     else:
         show_help_and_exit("bad opt %r" % o)
 
-
 cfvtest.setcfv(fn=args and args[0] or None, internal=run_internal)
 
 if run_unittests_only:
@@ -2113,7 +2137,8 @@ cfvcmd = '-ZNVRMUI --unquote=no --fixpaths="" --strippaths=0 --showpaths=auto-re
 logfile = open(
     os.path.join(
         tempfile.gettempdir(),
-        "cfv_%s_test-%s.log" % (cfvtest.ver_cfv, time.strftime("%Y%m%dT%H%M%S")),
+        "cfv_%s_test-%s.log" %
+        (cfvtest.ver_cfv, time.strftime("%Y%m%dT%H%M%S")),
     ),
     "w",
 )
@@ -2218,39 +2243,41 @@ def all_tests():
 
     # test handling of testfile args in recursive testmode
     test_generic(cfvcmd + " -r -p a " + os.path.join("C", "foo.bar"), cfv_test)
-    test_generic(cfvcmd + " -ri -p a " + os.path.join("c", "fOo.BaR"), cfv_test)
-    test_generic(cfvcmd + " -r -u -p a " + os.path.join("C", "foo.bar"), cfv_test)
-    test_generic(cfvcmd + " -ri -u -p a " + os.path.join("c", "fOo.BaR"), cfv_test)
+    test_generic(cfvcmd + " -ri -p a " + os.path.join("c", "fOo.BaR"),
+                 cfv_test)
+    test_generic(cfvcmd + " -r -u -p a " + os.path.join("C", "foo.bar"),
+                 cfv_test)
+    test_generic(cfvcmd + " -ri -u -p a " + os.path.join("c", "fOo.BaR"),
+                 cfv_test)
 
     test_generic(cfvcmd + " --strippaths=0 -T -f teststrip0.csv4", cfv_test)
     test_generic(cfvcmd + " --strippaths=1 -T -f teststrip1.csv4", cfv_test)
     test_generic(cfvcmd + " --strippaths=2 -T -f teststrip2.csv4", cfv_test)
     test_generic(cfvcmd + " --strippaths=all -T -f teststrip-1.csv4", cfv_test)
-    test_generic(
-        cfvcmd + " --strippaths=none -T -f teststrip-none.csv4", cfv_notfound_test
-    )
+    test_generic(cfvcmd + " --strippaths=none -T -f teststrip-none.csv4",
+                 cfv_notfound_test)
     test_generic(
         cfvcmd + r" --strippaths=0 --fixpaths \\/ -T -f testdrivestrip.md5",
         rcurry(cfv_all_test, ok=4),
     )
     test_generic(
-        cfvcmd
-        + r" --strippaths=0 --unquote=yes --fixpaths \\/ -T -f testdrivestripquoted.md5",
+        cfvcmd +
+        r" --strippaths=0 --unquote=yes --fixpaths \\/ -T -f testdrivestripquoted.md5",
         rcurry(cfv_all_test, ok=4),
     )
     test_generic(
-        cfvcmd
-        + r" --strippaths=0 --unquote=yes --fixpaths \\/ -T -f testdrivestripquoted.md5 data1 data3 data4",
+        cfvcmd +
+        r" --strippaths=0 --unquote=yes --fixpaths \\/ -T -f testdrivestripquoted.md5 data1 data3 data4",
         rcurry(cfv_all_test, ok=3),
     )
 
     test_generic(cfvcmd + " -i -T -f testcase.csv", cfv_test)
     test_generic(cfvcmd + " -T --unquote=yes -f testquoted.sfv", cfv_test)
-    test_generic(cfvcmd + " -i --unquote=yes -T -f testquotedcase.sfv", cfv_test)
+    test_generic(cfvcmd + " -i --unquote=yes -T -f testquotedcase.sfv",
+                 cfv_test)
     test_generic(
-        cfvcmd
-        + " -i --unquote=yes -T -f testquotedcase.sfv DaTa1 "
-        + os.path.join("a", "C", "Foo.bar"),
+        cfvcmd + " -i --unquote=yes -T -f testquotedcase.sfv DaTa1 " +
+        os.path.join("a", "C", "Foo.bar"),
         rcurry(cfv_all_test, ok=2),
     )
     test_generic(cfvcmd + " -i -T -f testquoted.csv4", cfv_test)
@@ -2272,7 +2299,7 @@ def all_tests():
         C_test(fmt, verify=coreutils_verify)
     C_test("csv")
     if pathfind(
-        "cksfv"
+            "cksfv"
     ):  # don't report pointless errors on systems that don't have cksfv
 
         def sfvverify(f):
@@ -2341,8 +2368,8 @@ def all_tests():
         specialfile_test(fn)
 
     test_generic(
-        cfvcmd + " -m -v -T -t sfv", lambda s, o: cfv_typerestrict_test(s, o, "sfv")
-    )
+        cfvcmd +
+        " -m -v -T -t sfv", lambda s, o: cfv_typerestrict_test(s, o, "sfv"))
     test_generic(
         cfvcmd + " -m -v -T -t sfvmd5",
         lambda s, o: cfv_typerestrict_test(s, o, "sfvmd5"),
@@ -2357,23 +2384,24 @@ def all_tests():
             lambda s, o: cfv_typerestrict_test(s, o, fmt),
         )
     test_generic(
-        cfvcmd + " -m -v -T -t csv", lambda s, o: cfv_typerestrict_test(s, o, "csv")
-    )
+        cfvcmd +
+        " -m -v -T -t csv", lambda s, o: cfv_typerestrict_test(s, o, "csv"))
     test_generic(
-        cfvcmd + " -m -v -T -t par", lambda s, o: cfv_typerestrict_test(s, o, "par")
-    )
+        cfvcmd +
+        " -m -v -T -t par", lambda s, o: cfv_typerestrict_test(s, o, "par"))
     test_generic(
-        cfvcmd + " -m -v -T -t par2", lambda s, o: cfv_typerestrict_test(s, o, "par2")
-    )
+        cfvcmd +
+        " -m -v -T -t par2", lambda s, o: cfv_typerestrict_test(s, o, "par2"))
 
     test_generic(
-        cfvcmd + " -u -t md5 -f test.md5 data* unchecked.dat test.md5", cfv_unv_test
-    )
+        cfvcmd + " -u -t md5 -f test.md5 data* unchecked.dat test.md5",
+        cfv_unv_test)
     test_generic(cfvcmd + " -u -f test.md5 data* unchecked.dat", cfv_unv_test)
-    test_generic(cfvcmd + " -u -f test.md5 data* unchecked.dat test.md5", cfv_unv_test)
+    test_generic(cfvcmd + " -u -f test.md5 data* unchecked.dat test.md5",
+                 cfv_unv_test)
     test_generic(
-        cfvcmd + r" -i -tcsv --fixpaths \\/ -Tu", lambda s, o: cfv_unv_test(s, o, None)
-    )
+        cfvcmd +
+        r" -i -tcsv --fixpaths \\/ -Tu", lambda s, o: cfv_unv_test(s, o, None))
     test_generic(cfvcmd + " -T -t md5 -f non_existant_file", cfv_cferror_test)
     test_generic(
         cfvcmd + " -T -f " + os.path.join("corrupt", "missingfiledesc.par2"),
@@ -2384,7 +2412,8 @@ def all_tests():
         cfv_cferror_test,
     )
     test_generic(
-        cfvcmd + " -T -m -f " + os.path.join("corrupt", "missingfiledesc.par2"),
+        cfvcmd + " -T -m -f " +
+        os.path.join("corrupt", "missingfiledesc.par2"),
         cfv_cferror_test,
     )
     test_generic(
@@ -2399,57 +2428,48 @@ def all_tests():
     )
     for strip in (0, 1):
         test_generic(
-            cfvcmd
-            + " -T --strippaths=%s -p foo -f %s"
-            % (strip, os.path.join(os.pardir, "foo.torrent")),
+            cfvcmd + " -T --strippaths=%s -p foo -f %s" %
+            (strip, os.path.join(os.pardir, "foo.torrent")),
             rcurry(cfv_all_test, ok=7),
         )
         test_generic(
-            cfvcmd
-            + " -T --strippaths=%s -p foo2err -f %s"
-            % (strip, os.path.join(os.pardir, "foo.torrent")),
+            cfvcmd + " -T --strippaths=%s -p foo2err -f %s" %
+            (strip, os.path.join(os.pardir, "foo.torrent")),
             rcurry(cfv_all_test, ok=4, badcrc=3),
         )
         test_generic(
-            cfvcmd
-            + " -T --strippaths=%s -p foo2err -f %s foo1 foo4"
-            % (strip, os.path.join(os.pardir, "foo.torrent")),
+            cfvcmd + " -T --strippaths=%s -p foo2err -f %s foo1 foo4" %
+            (strip, os.path.join(os.pardir, "foo.torrent")),
             rcurry(cfv_all_test, ok=0, badcrc=2),
         )
         test_generic(
-            cfvcmd
-            + " -T --strippaths=%s -p foo2err1 -f %s"
-            % (strip, os.path.join(os.pardir, "foo.torrent")),
+            cfvcmd + " -T --strippaths=%s -p foo2err1 -f %s" %
+            (strip, os.path.join(os.pardir, "foo.torrent")),
             rcurry(cfv_all_test, ok=6, badcrc=1),
         )
         test_generic(
-            cfvcmd
-            + " -T --strippaths=%s -p foo2err1 -f %s foo1 foo4"
-            % (strip, os.path.join(os.pardir, "foo.torrent")),
+            cfvcmd + " -T --strippaths=%s -p foo2err1 -f %s foo1 foo4" %
+            (strip, os.path.join(os.pardir, "foo.torrent")),
             rcurry(cfv_all_test, ok=2),
         )
         test_generic(
-            cfvcmd
-            + " -T --strippaths=%s -p foo2badsize -f %s"
-            % (strip, os.path.join(os.pardir, "foo.torrent")),
+            cfvcmd + " -T --strippaths=%s -p foo2badsize -f %s" %
+            (strip, os.path.join(os.pardir, "foo.torrent")),
             rcurry(cfv_all_test, ok=5, badsize=1, badcrc=1),
         )
         test_generic(
-            cfvcmd
-            + " -T --strippaths=%s -p foo2badsize -f %s foo1 foo4"
-            % (strip, os.path.join(os.pardir, "foo.torrent")),
+            cfvcmd + " -T --strippaths=%s -p foo2badsize -f %s foo1 foo4" %
+            (strip, os.path.join(os.pardir, "foo.torrent")),
             rcurry(cfv_all_test, ok=1, badcrc=1),
         )
         test_generic(
-            cfvcmd
-            + " -T --strippaths=%s -p foo2missing -f %s"
-            % (strip, os.path.join(os.pardir, "foo.torrent")),
+            cfvcmd + " -T --strippaths=%s -p foo2missing -f %s" %
+            (strip, os.path.join(os.pardir, "foo.torrent")),
             rcurry(cfv_all_test, ok=4, badcrc=2, notfound=1),
         )
         test_generic(
-            cfvcmd
-            + " -T --strippaths=%s -p foo2missing -f %s foo1 foo4"
-            % (strip, os.path.join(os.pardir, "foo.torrent")),
+            cfvcmd + " -T --strippaths=%s -p foo2missing -f %s foo1 foo4" %
+            (strip, os.path.join(os.pardir, "foo.torrent")),
             rcurry(cfv_all_test, ok=0, badcrc=2),
         )
     d = tempfile.mkdtemp()
@@ -2474,19 +2494,24 @@ def all_tests():
         largefile2GB_test()
         largefile4GB_test()
 
-    test_generic(
-        cfvcmd + " -t aoeu", rcurry(cfv_cftypehelp_test, 1), stdout="/dev/null"
-    )
-    test_generic(cfvcmd + " -t aoeu", rcurry(cfv_nooutput_test, 1), stderr="/dev/null")
-    test_generic(
-        cfvcmd + " -t help", rcurry(cfv_cftypehelp_test, 0), stderr="/dev/null"
-    )
-    test_generic(cfvcmd + " -t help", rcurry(cfv_nooutput_test, 0), stdout="/dev/null")
+    test_generic(cfvcmd + " -t aoeu",
+                 rcurry(cfv_cftypehelp_test, 1),
+                 stdout="/dev/null")
+    test_generic(cfvcmd + " -t aoeu",
+                 rcurry(cfv_nooutput_test, 1),
+                 stderr="/dev/null")
+    test_generic(cfvcmd + " -t help",
+                 rcurry(cfv_cftypehelp_test, 0),
+                 stderr="/dev/null")
+    test_generic(cfvcmd + " -t help",
+                 rcurry(cfv_nooutput_test, 0),
+                 stdout="/dev/null")
 
     test_generic(cfvcmd + " -h", cfv_nooutput_test, stdout="/dev/null")
     test_generic(cfvcmd + " -h", cfv_version_test, stderr="/dev/null")
 
-    donestr = "\n>>> tests finished:  ok: %i  failed: %i" % (stats.ok, stats.failed)
+    donestr = "\n>>> tests finished:  ok: %i  failed: %i" % (stats.ok,
+                                                             stats.failed)
     log(donestr)
     print(donestr)
 

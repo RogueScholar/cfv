@@ -158,8 +158,7 @@ def getfilehash(filename, hashname, hashfunc):
             view.progress.init(filename)
         try:
             hash, size = hashfunc(
-                filename, view.progress and view.progress.update or None
-            )
+                filename, view.progress and view.progress.update or None)
         finally:
             if view.progress:
                 view.progress.cleanup()
@@ -210,19 +209,19 @@ class Stats(object):
 
     def sub_stats_end(self, end):
         for v in (
-            "badcrc",
-            "badsize",
-            "bytesread",
-            "cferror",
-            "diffcase",
-            "misnamed",
-            "ferror",
-            "notfound",
-            "num",
-            "ok",
-            "quoted",
-            "unverified",
-            "textmode",
+                "badcrc",
+                "badsize",
+                "bytesread",
+                "cferror",
+                "diffcase",
+                "misnamed",
+                "ferror",
+                "notfound",
+                "num",
+                "ok",
+                "quoted",
+                "unverified",
+                "textmode",
         ):
             setattr(self, v, getattr(end, v) - getattr(self, v))
         end.subcount += 1
@@ -340,8 +339,8 @@ class Config(object):
             self.__dict__[o] = "n"
         else:
             raise CFVValueError(
-                "invalid %s option '%s', must be 'no', 'auto', or 'yes'" % (o, v)
-            )
+                "invalid %s option '%s', must be 'no', 'auto', or 'yes'" %
+                (o, v))
 
     def setstr(self, o, v):
         self.__dict__[o] = v
@@ -350,14 +349,14 @@ class Config(object):
         if o == "default":
             self.setdefault(v)
         elif o in (
-            "dirsort",
-            "cmdlinesort",
-            "ignorecase",
-            "rename",
-            "search",
-            "dereference",
-            "unquote",
-            "private_torrent",
+                "dirsort",
+                "cmdlinesort",
+                "ignorecase",
+                "rename",
+                "search",
+                "dereference",
+                "unquote",
+                "private_torrent",
         ):
             self.setbool(o, v)
         elif o in ("cmdlineglob", "progress"):
@@ -379,9 +378,8 @@ class Config(object):
                 else:
                     raise CFVValueError(
                         "invalid verbose option '%s', must be 'v', 'V', 'VV', 'q', 'Q' or -3 - 1"
-                        % v
-                    )
-        elif o in ("gzip",):
+                        % v)
+        elif o in ("gzip", ):
             self.setintr(o, v, -1, 1)
         elif o in ("recursive", "showunverified"):
             self.setintr(o, v, 0, 2)
@@ -413,8 +411,7 @@ class Config(object):
                         continue
                 raise CFVValueError(
                     "invalid showpaths option '%s', must be 'none', 'auto', 'yes', 'absolute', or 'relative'"
-                    % v
-                )
+                    % v)
         elif o == "strippaths":
             if "none".startswith(v.lower()):
                 self.strippaths = "n"
@@ -429,8 +426,7 @@ class Config(object):
                 except ValueError:
                     raise CFVValueError(
                         "invalid strippaths option '%s', must be 'none', 'all', or int >=0"
-                        % v
-                    )
+                        % v)
         elif o == "fixpaths":
             self.fixpaths = v and re.compile("[" + re.escape(v) + "]") or None
         elif o == "renameformat":
@@ -449,7 +445,8 @@ class Config(object):
         elif o == "filename_type":
             typename, match = v.split("=", 1)
             if not cftypes.has_handler(typename):
-                raise CFVValueError("filename_type: invalid type '%s'" % typename)
+                raise CFVValueError("filename_type: invalid type '%s'" %
+                                    typename)
             cftypes.add_user_cf_fn_regex(match, typename)
         elif o == "announceurl":
             self.setstr(o, v)
@@ -477,9 +474,8 @@ class Config(object):
                         continue  # ignore blank lines
                     x = s.split(" ", 1)
                     if len(x) != 2:
-                        raise CFVSyntaxError(
-                            "%s:%i: invalid line '%s'" % (filename, line_number, s)
-                        )
+                        raise CFVSyntaxError("%s:%i: invalid line '%s'" %
+                                             (filename, line_number, s))
                     else:
                         o, v = x
                         try:
@@ -487,8 +483,8 @@ class Config(object):
                         except CFVException as err:
                             # reuse the traceback of the original exception, but add file and line numbers to the error
                             raise RuntimeError(
-                                "%s:%i: %s" % (filename, line_number, err)
-                            ) from err
+                                "%s:%i: %s" %
+                                (filename, line_number, err)) from err
 
     def __init__(self):
         self.readconfig()
@@ -500,7 +496,8 @@ class Config(object):
                 dir = curdir
             else:
                 dir = reldir[-1]
-            return osutil.path_join(strutil.showfn(dir), strutil.showfn(filename))
+            return osutil.path_join(strutil.showfn(dir),
+                                    strutil.showfn(filename))
         return strutil.showfn(filename)
 
 
@@ -520,9 +517,8 @@ def parse_commentline(comment, commentchars):
 
 class ChksumType(object):
     def test_chksumfile(self, file, filename):
-        if (
-            config.showunverified
-        ):  # we can't expect the checksum file itself to be checksummed
+        if (config.showunverified
+            ):  # we can't expect the checksum file itself to be checksummed
             cache.set_verified(filename)
         try:
             cf_stats = stats.make_sub_stats()
@@ -540,9 +536,8 @@ class ChksumType(object):
 
     def search_file(self, filename, filecrc, filesize, errfunc, errargs):
         # don't bother searching if we don't have anything to compare against
-        if not config.search or (
-            filesize < 0 and (not filecrc or not config.docrcchecks)
-        ):
+        if not config.search or (filesize < 0 and
+                                 (not filecrc or not config.docrcchecks)):
             errfunc(*errargs)
             return -2
         alreadyok = None
@@ -584,7 +579,11 @@ class ChksumType(object):
             return 0
         if alreadyok:
             errfunc(foundok=1, *errargs)
-            self.do_f_found(filename, alreadyok[0], filesize, alreadyok[1], alreadyok=1)
+            self.do_f_found(filename,
+                            alreadyok[0],
+                            filesize,
+                            alreadyok[1],
+                            alreadyok=1)
             return 0
         errfunc(*errargs)
         return -1
@@ -619,8 +618,8 @@ class ChksumType(object):
                         self.do_f_badcrc,
                         (
                             l_filename,
-                            "crc does not match (%s!=%s)"
-                            % (filecrct.decode(), hexlify(c).decode()),
+                            "crc does not match (%s!=%s)" %
+                            (filecrct.decode(), hexlify(c).decode()),
                         ),
                     )
                     return -2
@@ -633,9 +632,8 @@ class ChksumType(object):
                 filecrct = "exists"
         # UnicodeError can occur if python can't map the filename to the filesystem's encoding
         except (EnvironmentError, UnicodeError) as a:
-            self.search_file(
-                filename, filecrc, filesize, self.do_f_enverror, (l_filename, a)
-            )
+            self.search_file(filename, filecrc, filesize, self.do_f_enverror,
+                             (l_filename, a))
             return -1
         self.do_f_ok(l_filename, filesize, filecrct)
 
@@ -691,11 +689,13 @@ class ChksumType(object):
                 if os.path.exists(newfilename):
                     if osutil.fcmp(l_filename, newfilename):
                         os.unlink(l_filename)
-                        view.ev_f_verifyerror_dupe(l_filename, a, newfilename, foundok)
+                        view.ev_f_verifyerror_dupe(l_filename, a, newfilename,
+                                                   foundok)
                         return
                 else:
                     rename(l_filename, newfilename)
-                    view.ev_f_verifyerror_renamed(l_filename, a, newfilename, foundok)
+                    view.ev_f_verifyerror_renamed(l_filename, a, newfilename,
+                                                  foundok)
                     return
         view.ev_f_verifyerror(l_filename, a, foundok)
 
@@ -714,8 +714,8 @@ class ChksumType(object):
                         os.link(found_fn, filename)
                     except (EnvironmentError, AttributeError) as e:
                         if isinstance(e, EnvironmentError) and e[0] not in (
-                            errno.EXDEV,
-                            errno.EPERM,
+                                errno.EXDEV,
+                                errno.EPERM,
                         ):
                             raise
                         verb = "copied", "copying"
@@ -730,15 +730,13 @@ class ChksumType(object):
             except EnvironmentError as e:
                 action = "%s %s" % (verb[1], prep)
                 stats.ferror += 1
-                view.ev_f_found_renameetcerror(
-                    filename, filesize, filecrct, found_fn, action, e
-                )
+                view.ev_f_found_renameetcerror(filename, filesize, filecrct,
+                                               found_fn, action, e)
             else:
                 action = "%s %s" % (verb[0], prep)
                 l_filename = filename
-                view.ev_f_found_renameetc(
-                    filename, filesize, filecrct, found_fn, action
-                )
+                view.ev_f_found_renameetc(filename, filesize, filecrct,
+                                          found_fn, action)
         else:
             view.ev_f_found(filename, filesize, filecrct, found_fn)
         if config.showunverified:
@@ -766,12 +764,8 @@ class ChksumType(object):
         return filename
 
     def mangle_filename(self, filename):
-        if (
-            config.unquote
-            and len(filename) > 1
-            and filename[0] == '"'
-            and filename[-1] == '"'
-        ):
+        if (config.unquote and len(filename) > 1 and filename[0] == '"'
+                and filename[-1] == '"'):
             # work around buggy sfv encoders that quote filenames
             filename = filename[1:-1]
             stats.quoted += 1
@@ -823,8 +817,7 @@ class TextChksumType(ChksumType):
 class FooSum_Base(TextChksumType):
     def do_test_chksumfile_print_testingline(self, file):
         TextChksumType.do_test_chksumfile_print_testingline(
-            self, file, parse_commentline(file.peekline(512), ";#")
-        )
+            self, file, parse_commentline(file.peekline(512), ";#"))
 
     def do_test_chksumline(self, l):
         if l[0] in ";#":
@@ -854,9 +847,9 @@ def gnu_sum(algo):
                 return c
 
         @staticmethod
-        def auto_chksumfile_match(
-            file, _autorem=re.compile(r"[0-9a-fA-F]{%d} [ *]." % hexlen)
-        ):
+        def auto_chksumfile_match(file,
+                                  _autorem=re.compile(
+                                      r"[0-9a-fA-F]{%d} [ *]." % hexlen)):
             line = file.peekline(4096)
             if isinstance(line, bytes):
                 return False
@@ -867,7 +860,8 @@ def gnu_sum(algo):
 
         auto_filename_match = algo
 
-        _foosum_rem = re.compile(r"([0-9a-fA-F]{%s}) ([ *])([^\r\n]+)[\r\n]*$" % hexlen)
+        _foosum_rem = re.compile(
+            r"([0-9a-fA-F]{%s}) ([ *])([^\r\n]+)[\r\n]*$" % hexlen)
 
         @staticmethod
         def make_std_filename(filename):
@@ -900,7 +894,6 @@ try:
 except (ImportError, ValueError):
     pass
 
-
 # ---------- sha1sum ----------
 
 
@@ -917,7 +910,8 @@ class SHA1(FooSum_Base, SHA1_MixIn):
     descinfo = "SHA1,name"
 
     @staticmethod
-    def auto_chksumfile_match(file, _autorem=re.compile(r"[0-9a-fA-F]{40} [ *].")):
+    def auto_chksumfile_match(file,
+                              _autorem=re.compile(r"[0-9a-fA-F]{40} [ *].")):
         line = file.peekline(4096)
         if isinstance(line, bytes):
             return False
@@ -941,7 +935,6 @@ class SHA1(FooSum_Base, SHA1_MixIn):
 
 cftypes.register_cftype(SHA1)
 
-
 # ---------- md5 ----------
 
 
@@ -958,7 +951,8 @@ class MD5(FooSum_Base, MD5_MixIn):
     descinfo = "MD5,name"
 
     @staticmethod
-    def auto_chksumfile_match(file, _autorem=re.compile(r"[0-9a-fA-F]{32} [ *].")):
+    def auto_chksumfile_match(file,
+                              _autorem=re.compile(r"[0-9a-fA-F]{32} [ *].")):
         line = file.peekline(4096)
         if isinstance(line, bytes):
             return False
@@ -982,7 +976,6 @@ class MD5(FooSum_Base, MD5_MixIn):
 
 cftypes.register_cftype(MD5)
 
-
 # ---------- bsdmd5 ----------
 
 
@@ -993,8 +986,8 @@ class BSDMD5(TextChksumType, MD5_MixIn):
 
     @staticmethod
     def auto_chksumfile_match(
-        file, _autorem=re.compile(r"MD5 \(.+\) = [0-9a-fA-F]{32}" + "[\r\n]*$")
-    ):
+            file,
+            _autorem=re.compile(r"MD5 \(.+\) = [0-9a-fA-F]{32}" + "[\r\n]*$")):
         line = file.peekline(4096)
         if isinstance(line, bytes):
             return False
@@ -1021,7 +1014,6 @@ class BSDMD5(TextChksumType, MD5_MixIn):
 
 cftypes.register_cftype(BSDMD5)
 
-
 # ---------- par ----------
 
 
@@ -1044,9 +1036,12 @@ class PAR(ChksumType, MD5_MixIn):
 
     def do_test_chksumfile(self, file):
         def prog2str(v):
-            return {0x01: "Mirror", 0x02: "PAR", 0x03: "SmartPar", 0xFF: "FSRaid"}.get(
-                v, "unknown(%x)" % v
-            )
+            return {
+                0x01: "Mirror",
+                0x02: "PAR",
+                0x03: "SmartPar",
+                0xFF: "FSRaid"
+            }.get(v, "unknown(%x)" % v)
 
         par_header_fmt = "< 8s I I 16s 16s Q Q Q Q Q Q"
         par_entry_fmt = "< Q Q Q 16s 16s"
@@ -1073,18 +1068,19 @@ class PAR(ChksumType, MD5_MixIn):
         # ver 0.9 and 1.0 are the same, as far as we care.  Future versions (if any) may very likey have incompatible changes, so don't accept them either.
         if version not in (0x00000900, 0x00010000):
             raise EnvironmentError(
-                errno.EINVAL, "can't handle PAR version %s" % ver2str(version)
-            )
+                errno.EINVAL, "can't handle PAR version %s" % ver2str(version))
 
         view.ev_test_cf_begin(
             "par v%s" % ver2str(version),
             file.name,
-            "created by %s v%s" % (prog2str(client >> 24), ver2str(client & 0xFFFFFF)),
+            "created by %s v%s" %
+            (prog2str(client >> 24), ver2str(client & 0xFFFFFF)),
         )
 
         for i in range(0, num_files):
             d = file.read(par_entry_fmtsize)
-            size, status, file_size, md5, md5_16k = struct.unpack(par_entry_fmt, d)
+            size, status, file_size, md5, md5_16k = struct.unpack(
+                par_entry_fmt, d)
             if config.docrcchecks:
                 control_md5.update(d)
             d = file.read(size - par_entry_fmtsize)
@@ -1105,8 +1101,8 @@ class PAR(ChksumType, MD5_MixIn):
                 if not d:
                     if control_md5.digest() != control_hash:
                         raise EnvironmentError(
-                            errno.EINVAL, "corrupt par file - bad control hash"
-                        )
+                            errno.EINVAL,
+                            "corrupt par file - bad control hash")
                     break
                 stats.bytesread += len(d)
                 control_md5.update(d)
@@ -1148,10 +1144,10 @@ class PAR2(ChksumType, MD5_MixIn):
                 if not d:
                     return None
                 magic, pkt_len, pkt_md5, set_id, pkt_type = struct.unpack(
-                    pkt_header_fmt, d
-                )
+                    pkt_header_fmt, d)
                 if pkt_type == "PAR 2.0\0Creator\0":
-                    return strutil.chompnulls(file.read(pkt_len - pkt_header_size))
+                    return strutil.chompnulls(
+                        file.read(pkt_len - pkt_header_size))
                 else:
                     file.seek(pkt_len - pkt_header_size, 1)
 
@@ -1166,7 +1162,8 @@ class PAR2(ChksumType, MD5_MixIn):
             if not d:
                 break
 
-            magic, pkt_len, pkt_md5, set_id, pkt_type = struct.unpack(pkt_header_fmt, d)
+            magic, pkt_len, pkt_md5, set_id, pkt_type = struct.unpack(
+                pkt_header_fmt, d)
 
             if config.docrcchecks:
                 control_md5 = hash.md5_new()
@@ -1177,15 +1174,13 @@ class PAR2(ChksumType, MD5_MixIn):
                 stats.bytesread += len(d)
                 if control_md5.digest() != pkt_md5:
                     raise EnvironmentError(
-                        errno.EINVAL, "corrupt par2 file - bad packet hash"
-                    )
+                        errno.EINVAL, "corrupt par2 file - bad packet hash")
 
             if pkt_type == b"PAR 2.0\0FileDesc":
                 if not config.docrcchecks:
                     d = file.read(pkt_len - pkt_header_size)
                 file_id, file_md5, file_md5_16k, file_size = struct.unpack(
-                    file_pkt_fmt, d[:file_pkt_size]
-                )
+                    file_pkt_fmt, d[:file_pkt_size])
                 if file_id not in seen_file_ids:
                     seen_file_ids.add(file_id)
                     filename = strutil.chompnulls(d[file_pkt_size:])
@@ -1194,8 +1189,7 @@ class PAR2(ChksumType, MD5_MixIn):
                     except (UnicodeError, FilenameError) as e:
                         stats.cferror += 1
                         view.ev_test_cf_filenameencodingerror(
-                            file.name, hexlify(file_id), e
-                        )
+                            file.name, hexlify(file_id), e)
                         continue
                     self.test_file(filename, file_md5, file_size)
             elif pkt_type == b"PAR 2.0\0Main\0\0\0\0":
@@ -1204,23 +1198,23 @@ class PAR2(ChksumType, MD5_MixIn):
                 if expected_file_ids is None:
                     expected_file_ids = []
                     slice_size, num_files = struct.unpack(
-                        main_pkt_fmt, d[:main_pkt_size]
-                    )
-                    num_nonrecovery = old_div((len(d) - main_pkt_size), 16) - num_files
+                        main_pkt_fmt, d[:main_pkt_size])
+                    num_nonrecovery = old_div(
+                        (len(d) - main_pkt_size), 16) - num_files
                     for i in range(
-                        main_pkt_size,
-                        main_pkt_size + (num_files + num_nonrecovery) * 16,
-                        16,
+                            main_pkt_size,
+                            main_pkt_size + (num_files + num_nonrecovery) * 16,
+                            16,
                     ):
-                        expected_file_ids.append(d[i : i + 16])
+                        expected_file_ids.append(d[i:i + 16])
             else:
                 if not config.docrcchecks:
                     file.seek(pkt_len - pkt_header_size, 1)
 
         if expected_file_ids is None:
             raise EnvironmentError(
-                errno.EINVAL, "corrupt or unsupported par2 file - no main packet found"
-            )
+                errno.EINVAL,
+                "corrupt or unsupported par2 file - no main packet found")
         for file_id in expected_file_ids:
             if file_id not in seen_file_ids:
                 raise EnvironmentError(
@@ -1237,7 +1231,6 @@ class PAR2(ChksumType, MD5_MixIn):
 
 
 cftypes.register_cftype(PAR2)
-
 
 # ---------- .torrent ----------
 
@@ -1261,22 +1254,25 @@ class Torrent(ChksumType):
 
     @staticmethod
     def auto_chksumfile_match(file):
-        return file.peek(1) == b"d" and file.peek(4096).find(b"8:announce") >= 0
+        return file.peek(
+            1) == b"d" and file.peek(4096).find(b"8:announce") >= 0
 
     def do_test_chksumfile(self, file):
         try:
             metainfo = bencode.bdecode(file.read())
             # Decode fields using the encoding specified in the torrent file
             encoding = metainfo.get("encoding", b"utf-8").decode("utf-8")
-            metainfo["announce"] = self._decode_str(metainfo["announce"], encoding)
+            metainfo["announce"] = self._decode_str(metainfo["announce"],
+                                                    encoding)
             if "comment" in metainfo:
-                metainfo["comment"] = self._decode_str(metainfo["comment"], encoding)
+                metainfo["comment"] = self._decode_str(metainfo["comment"],
+                                                       encoding)
             metainfo["info"]["name"] = self._decode_str(
-                metainfo["info"]["name"], encoding
-            )
+                metainfo["info"]["name"], encoding)
             for file_info in metainfo.get("info", {}).get("files", []):
                 file_info["path"] = [
-                    self._decode_str(part, encoding) for part in file_info["path"]
+                    self._decode_str(part, encoding)
+                    for part in file_info["path"]
                 ]
 
             btformats.check_message(metainfo)
@@ -1286,7 +1282,8 @@ class Torrent(ChksumType):
         comments = []
         if "creation date" in metainfo:
             try:
-                comments.append("created " + time.ctime(metainfo["creation date"]))
+                comments.append("created " +
+                                time.ctime(metainfo["creation date"]))
             except TypeError:
                 comments.append("created " + repr(metainfo["creation date"]))
         if "comment" in metainfo:
@@ -1369,7 +1366,8 @@ class Torrent(ChksumType):
             total_len = 0
             for finfo in info["files"]:
                 flength = finfo["length"]
-                files.append(init_file(dirpart + finfo["path"], total_len, flength))
+                files.append(
+                    init_file(dirpart + finfo["path"], total_len, flength))
                 total_len += flength
 
         if not config.docrcchecks:
@@ -1423,11 +1421,8 @@ class Torrent(ChksumType):
             if wanttest:
                 sh = hash.sha_new()
                 for f, fcurpos, fpiecelen in piecefiles:
-                    if (
-                        view.progress
-                        and f.l_filename
-                        and f.l_filename != view.progress.filename
-                    ):
+                    if (view.progress and f.l_filename
+                            and f.l_filename != view.progress.filename):
                         view.progress.cleanup()
                         view.progress.init(f.l_filename, f.size, fcurpos)
                     d = readfpiece(f, fcurpos, fpiecelen)
@@ -1445,9 +1440,8 @@ class Torrent(ChksumType):
                         if not f.done:
                             if view.progress:
                                 view.progress.cleanup()
-                            self.do_f_badcrc(
-                                f.l_filename, "piece %i missing data" % piece
-                            )
+                            self.do_f_badcrc(f.l_filename,
+                                             "piece %i missing data" % piece)
                             f.done = 1
                 elif sh.digest() != hashes[piece]:
                     if curfh.fh:
@@ -1476,7 +1470,8 @@ class Torrent(ChksumType):
                             if fcurpos + fpiecelen == f.size:
                                 if view.progress:
                                     view.progress.cleanup()
-                                self.do_f_ok(f.l_filename, f.size, "all pieces ok")
+                                self.do_f_ok(f.l_filename, f.size,
+                                             "all pieces ok")
                                 f.done = 1
 
         if view.progress:
@@ -1503,7 +1498,7 @@ class Torrent(ChksumType):
         self.files = []
         self.pieces = []
         self.piece_done = 0
-        self.piece_length = 2 ** config.piece_size_pow2
+        self.piece_length = 2**config.piece_size_pow2
         return file
 
     def make_addfile(self, filename):
@@ -1531,15 +1526,20 @@ class Torrent(ChksumType):
         if view.progress:
             view.progress.cleanup()
         self.files.append(
-            OrderedDict({"length": fs, "path": osutil.path_split(filename)})
-        )
+            OrderedDict({
+                "length": fs,
+                "path": osutil.path_split(filename)
+            }))
         return ("pieces %i..%i" % (firstpiece, len(self.pieces)), fs), ""
 
     def make_chksumfile_finish(self, file):
         if self.piece_done > 0:
             self.pieces.append(self.sh.digest())
 
-        info = {"pieces": b"".join(self.pieces), "piece length": self.piece_length}
+        info = {
+            "pieces": b"".join(self.pieces),
+            "piece length": self.piece_length
+        }
         if config.private_torrent:
             info["private"] = 1
         if len(self.files) == 1 and len(self.files[0]["path"]) == 1:
@@ -1575,7 +1575,6 @@ class Torrent(ChksumType):
 
 cftypes.register_cftype(Torrent)
 
-
 # ---------- sfv ----------
 
 
@@ -1592,8 +1591,7 @@ class SFV_Base(TextChksumType):
     def do_test_chksumfile_print_testingline(self, file):
         # override the default testing line to show first SFV comment line, if any
         TextChksumType.do_test_chksumfile_print_testingline(
-            self, file, parse_commentline(file.peekline(512), ";")
-        )
+            self, file, parse_commentline(file.peekline(512), ";"))
 
     def do_test_chksumline(self, l):
         if l[0] == ";":
@@ -1605,16 +1603,10 @@ class SFV_Base(TextChksumType):
 
     def make_chksumfile_create(self, filename):
         file = TextChksumType.make_chksumfile_create(self, filename)
-        file.write(
-            "; Generated by cfv v%s on %s"
-            % (
-                __version__,
-                time.strftime("%Y-%m-%d at %H:%M.%S", time.gmtime(time.time())),
-            )
-            + os.linesep
-            + ";"
-            + os.linesep
-        )
+        file.write("; Generated by cfv v%s on %s" % (
+            __version__,
+            time.strftime("%Y-%m-%d at %H:%M.%S", time.gmtime(time.time())),
+        ) + os.linesep + ";" + os.linesep)
         return file
 
 
@@ -1623,7 +1615,8 @@ class SFV(SFV_Base, CRC_MixIn):
     descinfo = "name,CRC32"
 
     @staticmethod
-    def auto_chksumfile_match(file, _autorem=re.compile(".+ [0-9a-fA-F]{8}[\n\r]*$")):
+    def auto_chksumfile_match(
+            file, _autorem=re.compile(".+ [0-9a-fA-F]{8}[\n\r]*$")):
         line = file.peekline(4096)
         while line:
             if line[0] != ";":
@@ -1651,7 +1644,8 @@ class SFVMD5(SFV_Base, MD5_MixIn):
     descinfo = "name,MD5"
 
     @staticmethod
-    def auto_chksumfile_match(file, _autorem=re.compile(".+ [0-9a-fA-F]{32}[\n\r]*$")):
+    def auto_chksumfile_match(
+            file, _autorem=re.compile(".+ [0-9a-fA-F]{32}[\n\r]*$")):
         line = file.peekline(4096)
         while line:
             if line[0] != ";":
@@ -1674,7 +1668,6 @@ class SFVMD5(SFV_Base, MD5_MixIn):
 
 
 cftypes.register_cftype(SFVMD5)
-
 
 # ---------- csv ----------
 
@@ -1703,8 +1696,9 @@ class CSV(TextChksumType, CRC_MixIn):
 
     @staticmethod
     def auto_chksumfile_match(
-        file, _autorem=re.compile(_csvfnautore + "[0-9]+,[0-9a-fA-F]{8},[\n\r]*$")
-    ):
+            file,
+            _autorem=re.compile(_csvfnautore +
+                                "[0-9]+,[0-9a-fA-F]{8},[\n\r]*$")):
         return _autorem.match(file.peekline(4096)) is not None
 
     auto_filename_match = "csv$"
@@ -1715,9 +1709,8 @@ class CSV(TextChksumType, CRC_MixIn):
         x = self._csvrem.match(l)
         if not x:
             return -1
-        self.test_file(
-            csvunquote(x.group(1), x.group(2)), unhexlify(x.group(4)), int(x.group(3))
-        )
+        self.test_file(csvunquote(x.group(1), x.group(2)),
+                       unhexlify(x.group(4)), int(x.group(3)))
 
     @staticmethod
     def make_std_filename(filename):
@@ -1731,7 +1724,6 @@ class CSV(TextChksumType, CRC_MixIn):
 
 cftypes.register_cftype(CSV)
 
-
 # ---------- csv with 4 fields ----------
 
 
@@ -1742,14 +1734,14 @@ class CSV4(TextChksumType, CRC_MixIn):
 
     @staticmethod
     def auto_chksumfile_match(
-        file,
-        _autorem=re.compile(
-            r"%s[0-9]+,[0-9a-fA-F]{8},%s[\n\r]*$" % (_csvfnautore, _csvstrautore)
-        ),
+            file,
+            _autorem=re.compile(r"%s[0-9]+,[0-9a-fA-F]{8},%s[\n\r]*$" %
+                                (_csvfnautore, _csvstrautore)),
     ):
         return _autorem.match(file.peekline(4096)) is not None
 
-    _csv4rem = re.compile(r"%s([0-9]+),([0-9a-fA-F]{8}),%s" % (_csvfnre, _csvstrre))
+    _csv4rem = re.compile(r"%s([0-9]+),([0-9a-fA-F]{8}),%s" %
+                          (_csvfnre, _csvstrre))
 
     def do_test_chksumline(self, l):
         x = self._csv4rem.match(l)
@@ -1773,12 +1765,12 @@ class CSV4(TextChksumType, CRC_MixIn):
         p = os.path.split(filename)
         return (
             (c, s),
-            "%s,%i,%s,%s," % (csvquote(p[1]), s, c, csvquote(p[0])) + os.linesep,
+            "%s,%i,%s,%s," % (csvquote(p[1]), s, c, csvquote(p[0])) +
+            os.linesep,
         )
 
 
 cftypes.register_cftype(CSV4)
-
 
 # ---------- csv with only 2 fields ----------
 
@@ -1789,9 +1781,9 @@ class CSV2(TextChksumType):
     descinfo = "name,size"
 
     @staticmethod
-    def auto_chksumfile_match(
-        file, _autorem=re.compile(_csvfnautore + "[0-9]+,[\n\r]*$")
-    ):
+    def auto_chksumfile_match(file,
+                              _autorem=re.compile(_csvfnautore +
+                                                  "[0-9]+,[\n\r]*$")):
         return _autorem.match(file.peekline(4096)) is not None
 
     _csv2rem = re.compile(_csvfnre + r"([0-9]+),")
@@ -1800,7 +1792,8 @@ class CSV2(TextChksumType):
         x = self._csv2rem.match(l)
         if not x:
             return -1
-        self.test_file(csvunquote(x.group(1), x.group(2)), None, int(x.group(3)))
+        self.test_file(csvunquote(x.group(1), x.group(2)), None,
+                       int(x.group(3)))
 
     @staticmethod
     def make_std_filename(filename):
@@ -1816,7 +1809,6 @@ class CSV2(TextChksumType):
 
 
 cftypes.register_cftype(CSV2)
-
 
 # ---------- jpegsheriff .crc ----------
 
@@ -1850,11 +1842,11 @@ class JPEGSheriff_CRC(TextChksumType, CRC_MixIn):
 
     @staticmethod
     def auto_chksumfile_match(
-        file,
-        _autorem=re.compile(
-            r"^Filename\s+(Filesize\s+)?.*?CRC-?32.*^-+(\s+-+){1,4}\s*$",
-            re.DOTALL | re.IGNORECASE | re.MULTILINE,
-        ),
+            file,
+            _autorem=re.compile(
+                r"^Filename\s+(Filesize\s+)?.*?CRC-?32.*^-+(\s+-+){1,4}\s*$",
+                re.DOTALL | re.IGNORECASE | re.MULTILINE,
+            ),
     ):
         return _autorem.search(file.peekdecoded(1024)) is not None
 
@@ -1908,11 +1900,9 @@ class JPEGSheriff_CRC(TextChksumType, CRC_MixIn):
     def make_chksumfile_create(self, filename):
         file = TextChksumType.make_chksumfile_create(self, filename)
         file.write("Generated by: cfv (v%s)" % __version__ + os.linesep)
-        file.write(
-            "Generated at: %s"
-            % (time.strftime("%a, %d %b %Y %H:%M:%S", time.gmtime(time.time())))
-            + os.linesep
-        )
+        file.write("Generated at: %s" % (
+            time.strftime("%a, %d %b %Y %H:%M:%S", time.gmtime(time.time()))) +
+                   os.linesep)
         file.write("Find  it  at: " + __homepage__ + os.linesep + os.linesep)
         try:
             from PIL import Image  # noqa: F401
@@ -1929,12 +1919,13 @@ class JPEGSheriff_CRC(TextChksumType, CRC_MixIn):
         flens = self._fieldlens
 
         def writedata(data):
-            file.write(data[0].ljust(flens[0]) + "  " + data[1].rjust(flens[1]))
+            file.write(data[0].ljust(flens[0]) + "  " +
+                       data[1].rjust(flens[1]))
             if self.use_dimensions:
-                file.write(
-                    "  " + data[2].rjust(flens[2]) + " x " + data[3].rjust(flens[3])
-                )
-            file.write("  " + data[4].rjust(flens[4]) + "  " + data[5] + os.linesep)
+                file.write("  " + data[2].rjust(flens[2]) + " x " +
+                           data[3].rjust(flens[3]))
+            file.write("  " + data[4].rjust(flens[4]) + "  " + data[5] +
+                       os.linesep)
 
         header = (
             "Filename",
@@ -1962,7 +1953,8 @@ class JPEGSheriff_CRC(TextChksumType, CRC_MixIn):
                 stats.ok -= 1  # ugly hack, since this is incremented after make_addfile returns, since we don't know then that it will cause an error
                 view.ev_make_filenameencodingerror(fdata[0], e)
         file.write(boundary)
-        file.write(os.linesep + "Count of files: %i" % len(self._flist) + os.linesep)
+        file.write(os.linesep + "Count of files: %i" % len(self._flist) +
+                   os.linesep)
         file.write("Total of sizes: %s" % commaize(self._ftotal) + os.linesep)
         TextChksumType.make_chksumfile_finish(self, file)
 
@@ -1985,7 +1977,6 @@ class JPEGSheriff_CRC(TextChksumType, CRC_MixIn):
 
 cftypes.register_cftype(JPEGSheriff_CRC)
 
-
 # ---------- generic ----------
 
 _visited_dirs = set()
@@ -2006,9 +1997,8 @@ def visit_dir(name, st=None, noisy=1):
             if dir_key in _visited_dirs:
                 if noisy:
                     view.ev_generic_warning(
-                        "skipping already visited dir %s %s"
-                        % (view.perhaps_showpath(name), dir_key)
-                    )
+                        "skipping already visited dir %s %s" %
+                        (view.perhaps_showpath(name), dir_key))
                 return 0
             _visited_dirs.add(dir_key)
         return 1
@@ -2024,10 +2014,8 @@ def test(filename, typename, restrict_typename="auto"):
     try:
         file = fileutil.open_read(filename, config)
         cftype = cftypes.auto_chksumfile_match(file)
-        if (
-            restrict_typename != "auto"
-            and cftypes.get_handler(restrict_typename) != cftype
-        ):
+        if (restrict_typename != "auto"
+                and cftypes.get_handler(restrict_typename) != cftype):
             return
         if cftype:
             cf = cftype()
@@ -2086,15 +2074,14 @@ def make(cftype, ifilename, testfiles):
                         if config.dirsort:
                             strutil.safesort(rfiles)
                         testfiles[:i] = list(
-                            map(lambda x, p=f: osutil.path_join(p, x), rfiles)
-                        )
+                            map(lambda x, p=f: osutil.path_join(p, x), rfiles))
                         i = 0
                     except EnvironmentError as a:
                         view.ev_d_enverror(f, a)
                         stats.ferror += 1
                 continue
             if (
-                tfauto
+                    tfauto
             ):  # if user isn't specifying files, don't even try to add dirs and stuff, and don't print errors about it.
                 continue
         stats.num += 1
@@ -2204,10 +2191,8 @@ def show_unverified_dir(path, unvchild=0):
                 if stats.unverified - dunvsave and not dv:
                     unv_sub_dirs.append(filename)
             elif pathcache:
-                if not (
-                    pathcache.get(fn, {}).get("_verified")
-                    or pathcache.get(sfn, {}).get("_verified")
-                ):
+                if not (pathcache.get(fn, {}).get("_verified")
+                        or pathcache.get(sfn, {}).get("_verified")):
                     if S_ISREG(st.st_mode):
                         show_unverified_file(filename)
             else:
@@ -2220,16 +2205,13 @@ def show_unverified_dir(path, unvchild=0):
         if vsub:  # if sub directories do have verified files
             if unv:  # and this directory does have unverified files
                 view.ev_unverified_dir(path)
-            for (
-                unvpath
-            ) in (
-                unv_sub_dirs
+            for (unvpath) in (
+                    unv_sub_dirs
             ):  # print sub dirs that had unverified files and no verified files
                 view.ev_unverified_dirrecursive(unvpath)
         elif not unvchild:  # if this is the root of a tree with no verified files
-            if (
-                stats.unverified - unvsave
-            ):  # and there were unverified files in the tree
+            if (stats.unverified -
+                    unvsave):  # and there were unverified files in the tree
                 view.ev_unverified_dirrecursive(path)
     return vsub + (not not pathcache)
 
@@ -2249,10 +2231,8 @@ def show_unverified_dir_verbose(path):
             st = os.stat(filename)
             if S_ISDIR(st.st_mode) and visit_dir(filename, st, noisy=0):
                 show_unverified_dir_verbose(filename)
-            elif not (
-                pathcache.get(fn, {}).get("_verified")
-                or pathcache.get(sfn, {}).get("_verified")
-            ):
+            elif not (pathcache.get(fn, {}).get("_verified")
+                      or pathcache.get(sfn, {}).get("_verified")):
                 if S_ISREG(st.st_mode):
                     show_unverified_file(filename)
         except OSError:
@@ -2312,18 +2292,20 @@ def autotest(typename):
 def printusage(err=0):
     phelp = err and view.perror or view.pinfo
     phelp("Usage: cfv [opts] [-p dir] [-T|-C] [-t type] [-f file] [files...]")
-    phelp("  -r       recursive mode 1 (make seperate chksum files for each dir)")
-    phelp("  -rr      recursive mode 2 (make a single file with deep listing in it)")
+    phelp(
+        "  -r       recursive mode 1 (make seperate chksum files for each dir)"
+    )
+    phelp(
+        "  -rr      recursive mode 2 (make a single file with deep listing in it)"
+    )
     phelp("  -R       not recursive (default)")
     if _hassymlinks:
         phelp("  -l       follow symlinks (default)")
         phelp("  -L       don't follow symlinks")
     phelp("  -T       test mode (default)")
     phelp("  -C       create mode")
-    phelp(
-        "  -t <t>   set type to <t> (%s, or auto(default))"
-        % ", ".join(sorted(cftypes.get_handler_names()))
-    )
+    phelp("  -t <t>   set type to <t> (%s, or auto(default))" %
+          ", ".join(sorted(cftypes.get_handler_names())))
     phelp("  -f <f>   use <f> as list file")
     phelp("  -m       check only for missing files (don't compare checksums)")
     phelp("  -M       check checksums (default)")
@@ -2348,11 +2330,14 @@ def printusage(err=0):
     phelp("  -z       make gzipped files in auto create mode")
     phelp("  -Z       don't create gzipped files automatically. (default)")
     phelp("  -ZZ      never use gzip, even if file ends in .gz")
-    phelp(" --list=<l> raw list files of type <l> (%s)" % ", ".join(ui.LISTARGS))
+    phelp(" --list=<l> raw list files of type <l> (%s)" %
+          ", ".join(ui.LISTARGS))
     phelp(
         " --list0=<l> same as list, but seperate files with nulls (useful for xargs -0)"
     )
-    phelp(" --encoding=<e>  encoding of checksum files (raw, auto(default), or...)")
+    phelp(
+        " --encoding=<e>  encoding of checksum files (raw, auto(default), or...)"
+    )
     phelp(
         " --unquote=VAL  handle checksum files with quoted filenames (yes or no(default))"
     )
@@ -2365,7 +2350,9 @@ def printusage(err=0):
     phelp(" --version show cfv and module versions")
     phelp("torrent creation options:")
     phelp(" --announceurl=URL    tracker announce url")
-    phelp(" --piece_size_pow2=N  power of two to set the piece size to (default 18)")
+    phelp(
+        " --piece_size_pow2=N  power of two to set the piece size to (default 18)"
+    )
     phelp(" --private_torrent    set private flag in torrent")
     sys.exit(err)
 
@@ -2373,8 +2360,7 @@ def printusage(err=0):
 def printhelp():
     view.pinfo(
         "cfv v%s - Copyright (C) 2000-2013 Matthew Mueller - Copyright (C) 2018-2019 David Gnedt - GPL license"
-        % __version__
-    )
+        % __version__)
     printusage()
 
 
@@ -2448,9 +2434,8 @@ def main(argv=None):
     args = list(map(decode_arg, args))
 
     try:
-        if config.cmdlineglob == "y" or (
-            config.cmdlineglob == "a" and os.name in ("os2", "nt", "dos")
-        ):
+        if config.cmdlineglob == "y" or (config.cmdlineglob == "a"
+                                         and os.name in ("os2", "nt", "dos")):
             from glob import glob
 
             globbed = []
@@ -2547,9 +2532,8 @@ def main(argv=None):
                     config.gzip = 0
             elif o == "--list" or o == "--list0":
                 if a not in ui.LISTARGS:
-                    raise CFVValueError(
-                        "list arg must be one of: " + ", ".join(ui.LISTARGS)
-                    )
+                    raise CFVValueError("list arg must be one of: " +
+                                        ", ".join(ui.LISTARGS))
                 config.list = ui.LISTARGS[a]
                 config.listsep = o == "--list0" and "\0" or "\n"
                 if config.list == ui.LISTUNVERIFIED:
@@ -2631,14 +2615,12 @@ def main(argv=None):
     if stats.subcount != 1 or stats.unverified or stats.cferror:
         view.pinfo(str(stats))
 
-    sys.exit(
-        (stats.badcrc and 2)
-        | (stats.badsize and 4)
-        | (stats.notfound and 8)
-        | (stats.ferror and 16)
-        | (stats.unverified and 32)
-        | (stats.cferror and 64)
-    )
+    sys.exit((stats.badcrc and 2)
+             | (stats.badsize and 4)
+             | (stats.notfound and 8)
+             | (stats.ferror and 16)
+             | (stats.unverified and 32)
+             | (stats.cferror and 64))
 
 
 if __name__ == "__main__":

@@ -27,7 +27,8 @@ version = _get_version("lib/cfv/common.py")
 setup(
     name="cfv",
     version=version,
-    description="Command-line File Verify - versatile file checksum creator and verifier",
+    description=
+    "Command-line File Verify - versatile file checksum creator and verifier",
     long_description=_read("README.md"),
     long_description_content_type="text/markdown",
     url="https://github.com/cfv-project/cfv",
@@ -43,7 +44,8 @@ setup(
         "Programming Language :: Python :: 3",
         "Programming Language :: Python :: 3.6",
     ],
-    keywords="cfv checksum verify sfv csv crc bsdmd5 md5sum sha1sum sha224sum sha256sum sha384sum sha512sum torrent par par2",
+    keywords=
+    "cfv checksum verify sfv csv crc bsdmd5 md5sum sha1sum sha224sum sha256sum sha384sum sha512sum torrent par par2",
     project_urls={
         "Bug Tracker": "https://github.com/cfv-project/cfv/issues",
         "Source Code": "https://github.com/cfv-project/cfv",
@@ -54,5 +56,9 @@ setup(
     package_dir={"": "lib"},
     include_package_data=True,
     data_files=[("man/man1", ["cfv.1"])],
-    entry_points={"console_scripts": ["cfv=cfv.common:main",],},
+    entry_points={
+        "console_scripts": [
+            "cfv=cfv.common:main",
+        ],
+    },
 )

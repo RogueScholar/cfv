@@ -37,7 +37,6 @@ standard_library.install_aliases()
 
 from unittest import TestCase  # noqa: F401
 
-
 cfvenv = ""
 
 cfvfn = None
@@ -96,7 +95,10 @@ def runcfv_exe(cmd, stdin=None, stdout=None, stderr=None, need_reload=0):
     if stderr:
         p_stderr = open_output(stderr)
     argv = [cfvfn] + expand_cmdline(cmd)
-    proc = subprocess.Popen(argv, stdin=p_stdin, stdout=p_stdout, stderr=p_stderr)
+    proc = subprocess.Popen(argv,
+                            stdin=p_stdin,
+                            stdout=p_stdout,
+                            stderr=p_stderr)
     for f in p_stdin, p_stdout, p_stderr:
         if f not in (subprocess.PIPE, subprocess.STDOUT, None):
             f.close()
@@ -200,7 +202,7 @@ def get_version_flags():
     global ver_cfv, ver_fchksum, ver_mmap
     s, o = runcfv("--version", need_reload=1)
     if o.find("cfv ") >= 0:
-        ver_cfv = o[o.find("cfv ") + 4 :].splitlines()[0]
+        ver_cfv = o[o.find("cfv ") + 4:].splitlines()[0]
     else:
         ver_cfv = None
     ver_fchksum = o.find("fchksum") >= 0
@@ -218,7 +220,8 @@ def setcfv(fn=None, internal=None):
 
     assert os.path.isfile(fn)
     cfvfn = os.path.abspath(fn)
-    _cfv_code = open(cfvfn, "r").read().replace("\r\n", "\n").replace("\r", "\n")
+    _cfv_code = open(cfvfn, "r").read().replace("\r\n",
+                                                "\n").replace("\r", "\n")
     cfv_compiled = compile(_cfv_code, cfvfn, "exec")
 
     # This is so that the sys.path modification of the wrapper (if it has one) will be executed..

@@ -4,7 +4,6 @@ from builtins import range
 from collections import OrderedDict
 from re import compile
 
-
 reg = compile(r"^[^/\\.~][^/\\]*$")
 
 
@@ -45,7 +44,8 @@ def check_info(info):
                 if type(p) != str:
                     raise ValueError("bad metainfo - bad path dir")
                 if not reg.match(p):
-                    raise ValueError("path %s disallowed for security reasons" % p)
+                    raise ValueError(
+                        "path %s disallowed for security reasons" % p)
         for i in range(len(files)):
             for j in range(i):
                 if files[i]["path"] == files[j]["path"]:

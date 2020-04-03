@@ -9,7 +9,6 @@ from cfv import strutil
 from cfv import term
 from cfv.progress import TimedProgressMeter
 
-
 LISTOK = 512
 LISTBAD = 1024
 LISTNOTFOUND = 2048
@@ -43,21 +42,15 @@ class View(object):
     def setup_output(self):
         self.stdinfo = self._stdout_special and self.stderr or self.stdout
         # if one of stdinfo (usually stdout) or stderr is a tty, use it.  Otherwise use stdinfo.
-        progressfd = (
-            self.stdinfo.isatty()
-            and self.stdinfo
-            or self.stderr.isatty()
-            and self.stderr
-            or self.stdinfo
-        )
+        progressfd = (self.stdinfo.isatty() and self.stdinfo
+                      or self.stderr.isatty() and self.stderr or self.stdinfo)
         doprogress = not self.config.verbose == -2 and (
-            self.config.progress == "y"
-            or (self.config.progress == "a" and progressfd.isatty())
-        )
+            self.config.progress == "y" or
+            (self.config.progress == "a" and progressfd.isatty()))
         if doprogress:
-            self.progress = TimedProgressMeter(
-                fd=progressfd, scrwidth=term.scrwidth, frobfn=self.perhaps_showpath
-            )
+            self.progress = TimedProgressMeter(fd=progressfd,
+                                               scrwidth=term.scrwidth,
+                                               frobfn=self.perhaps_showpath)
         else:
             self.progress = None
 
@@ -72,11 +65,13 @@ class View(object):
     def perror(self, s, nl="\n"):
         # import traceback;traceback.print_stack()####
         if self.config.verbose >= -1:
-            self.stdout.flush()  # avoid inconsistent screen state if stdout has unflushed data
+            self.stdout.flush(
+            )  # avoid inconsistent screen state if stdout has unflushed data
             self.stderr.write(s + nl)
 
     def plistf(self, filename):
-        self.stdout.write(self.perhaps_showpath(filename) + self.config.listsep)
+        self.stdout.write(
+            self.perhaps_showpath(filename) + self.config.listsep)
 
     def ev_test_cf_begin(self, cftypename, filename, comment):
         if comment:
@@ -85,10 +80,8 @@ class View(object):
             comment = strutil.rchoplen(comment, 102)
         else:
             comment = ""
-        self.pverbose(
-            "testing from %s (%s%s)"
-            % (strutil.showfn(filename), cftypename.lower(), comment)
-        )
+        self.pverbose("testing from %s (%s%s)" %
+                      (strutil.showfn(filename), cftypename.lower(), comment))
 
     def ev_test_cf_done(self, filename, cf_stats):
         self.pinfo("%s: %s" % (self.perhaps_showpath(filename), cf_stats))
@@ -96,65 +89,61 @@ class View(object):
     ev_make_cf_done = ev_test_cf_done
 
     def ev_test_cf_unrecognized_line(self, filename, lineno):
-        self.perror(
-            "%s : unrecognized line %i (CF)" % (self.perhaps_showpath(filename), lineno)
-        )
+        self.perror("%s : unrecognized line %i (CF)" %
+                    (self.perhaps_showpath(filename), lineno))
 
     def ev_test_cf_lineencodingerror(self, filename, lineno, ex):
-        self.perror(
-            "%s : line %i: %s (CF)" % (self.perhaps_showpath(filename), lineno, ex)
-        )
+        self.perror("%s : line %i: %s (CF)" %
+                    (self.perhaps_showpath(filename), lineno, ex))
 
     def ev_test_cf_filenameencodingerror(self, filename, fileid, ex):
-        self.perror(
-            "%s : file %s: %s (CF)" % (self.perhaps_showpath(filename), fileid, ex)
-        )
+        self.perror("%s : file %s: %s (CF)" %
+                    (self.perhaps_showpath(filename), fileid, ex))
 
     def ev_test_cf_invaliddata(self, filename, e):
         self.perror("%s : %s (CF)" % (self.perhaps_showpath(filename), e))
 
     def ev_test_cf_unrecognized(self, filename, decode_errors):
         if decode_errors:
-            self.perror(
-                "I don't recognize the type or encoding of %s"
-                % strutil.showfn(filename)
-            )
+            self.perror("I don't recognize the type or encoding of %s" %
+                        strutil.showfn(filename))
         else:
-            self.perror("I don't recognize the type of %s" % strutil.showfn(filename))
+            self.perror("I don't recognize the type of %s" %
+                        strutil.showfn(filename))
 
     def ev_cf_enverror(self, filename, e):
-        self.perror("%s : %s (CF)" % (self.perhaps_showpath(filename), enverrstr(e)))
+        self.perror("%s : %s (CF)" %
+                    (self.perhaps_showpath(filename), enverrstr(e)))
 
     def ev_make_filenameencodingerror(self, filename, e):
-        self.perror(
-            "%s : unencodable filename: %s" % (self.perhaps_showpath(filename), e)
-        )
+        self.perror("%s : unencodable filename: %s" %
+                    (self.perhaps_showpath(filename), e))
 
     def ev_make_filenamedecodingerror(self, filename):
-        self.perror("%s : undecodable filename" % self.perhaps_showpath(filename))
+        self.perror("%s : undecodable filename" %
+                    self.perhaps_showpath(filename))
 
     def ev_make_filenameinvalid(self, filename):
-        self.perror(
-            "%s : filename invalid for this cftype" % (self.perhaps_showpath(filename))
-        )
+        self.perror("%s : filename invalid for this cftype" %
+                    (self.perhaps_showpath(filename)))
 
     def ev_make_cf_typenotsupported(self, filename, cftype):
-        self.perror(
-            "%s : %s not supported in create mode"
-            % (strutil.showfn(filename), cftype.__name__.lower())
-        )
+        self.perror("%s : %s not supported in create mode" %
+                    (strutil.showfn(filename), cftype.__name__.lower()))
 
     def ev_make_cf_alreadyexists(self, filename):
         self.perror("%s already exists" % self.perhaps_showpath(filename))
 
     def ev_d_enverror(self, path, ex):
-        self.perror("%s%s : %s" % (strutil.showfn(path), os.sep, enverrstr(ex)))
+        self.perror("%s%s : %s" %
+                    (strutil.showfn(path), os.sep, enverrstr(ex)))
 
     def ev_f_enverror(self, l_filename, ex):
         if ex.args[0] == errno.ENOENT:
             if self.config.list & LISTNOTFOUND:
                 self.plistf(l_filename)
-        self.perror("%s : %s" % (self.perhaps_showpath(l_filename), enverrstr(ex)))
+        self.perror("%s : %s" %
+                    (self.perhaps_showpath(l_filename), enverrstr(ex)))
 
     def ev_f_verifyerror(self, l_filename, msg, foundok):
         if not foundok:
@@ -171,19 +160,20 @@ class View(object):
 
     def ev_f_verifyerror_renamed(self, filename, msg, newfilename, foundok):
         self.ev_f_verifyerror(
-            filename, msg + " (renamed to %s)" % strutil.showfn(newfilename), foundok
-        )
+            filename, msg + " (renamed to %s)" % strutil.showfn(newfilename),
+            foundok)
 
-    def ev_f_found_renameetcerror(
-        self, filename, filesize, filecrc, found_fn, action, e
-    ):
+    def ev_f_found_renameetcerror(self, filename, filesize, filecrc, found_fn,
+                                  action, e):
         eaction = "but error %r occured %s" % (enverrstr(e), action)
         self.ev_f_found(filename, filesize, filecrc, found_fn, eaction)
 
-    def ev_f_found_renameetc(self, filename, filesize, filecrc, found_fn, action):
+    def ev_f_found_renameetc(self, filename, filesize, filecrc, found_fn,
+                             action):
         self.ev_f_found(filename, filesize, filecrc, found_fn, action)
 
-    def ev_f_found(self, filename, filesize, filecrc, found_fn, action="found"):
+    def ev_f_found(self, filename, filesize, filecrc, found_fn,
+                   action="found"):
         self.ev_f_ok(
             filename,
             filesize,
@@ -196,13 +186,11 @@ class View(object):
             self.plistf(filename)
         if filesize >= 0:
             self.pverbose(
-                "%s : %s (%i,%s)"
-                % (self.perhaps_showpath(filename), msg, filesize, filecrc)
-            )
+                "%s : %s (%i,%s)" %
+                (self.perhaps_showpath(filename), msg, filesize, filecrc))
         else:
-            self.pverbose(
-                "%s : %s (%s)" % (self.perhaps_showpath(filename), msg, filecrc)
-            )
+            self.pverbose("%s : %s (%s)" %
+                          (self.perhaps_showpath(filename), msg, filecrc))
 
     def ev_generic_warning(self, msg):
         self.perror("warning: %s" % msg)
