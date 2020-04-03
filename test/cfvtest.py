@@ -19,23 +19,23 @@
 
 from __future__ import print_function
 
+from unittest import main
+from glob import glob
+from doctest import DocTestSuite
+import unittest
+import traceback
+import sys
+import shlex
+import os
+import importlib
+import imp
+import fnmatch
+from builtins import object
+from builtins import map
 from future import standard_library
 standard_library.install_aliases()
-from builtins import map
-from builtins import object
 
-import fnmatch
-import imp
-import importlib
-import os
-import shlex
-import sys
-import traceback
-import unittest
-from doctest import DocTestSuite
-from glob import glob
 from unittest import TestCase  # noqa: F401
-from unittest import main
 
 
 cfvenv = ''
@@ -78,7 +78,8 @@ def expand_cmdline(cmd):
 
 
 def runcfv_exe(cmd, stdin=None, stdout=None, stderr=None, need_reload=0):
-    import subprocess  # subprocess module only in python >= 2.4, but it works on windows, unlike commands
+    # subprocess module only in python >= 2.4, but it works on windows, unlike commands
+    import subprocess
 
     def open_output(fn):
         if fn == '/dev/null' and not os.path.exists(fn):
@@ -95,7 +96,8 @@ def runcfv_exe(cmd, stdin=None, stdout=None, stderr=None, need_reload=0):
     if stderr:
         p_stderr = open_output(stderr)
     argv = [cfvfn] + expand_cmdline(cmd)
-    proc = subprocess.Popen(argv, stdin=p_stdin, stdout=p_stdout, stderr=p_stderr)
+    proc = subprocess.Popen(argv, stdin=p_stdin,
+                            stdout=p_stdout, stderr=p_stderr)
     for f in p_stdin, p_stdout, p_stderr:
         if f not in (subprocess.PIPE, subprocess.STDOUT, None):
             f.close()
@@ -148,10 +150,12 @@ def runcfv_py(cmd, stdin=None, stdout=None, stderr=None, need_reload=0):
         import cfv.cftypes
         importlib.reload(cfv.cftypes)  # XXX
         import cfv.common
-        importlib.reload(cfv.common)  # XXX: hack until I can get all the global state storage factored out.
+        # XXX: hack until I can get all the global state storage factored out.
+        importlib.reload(cfv.common)
         if need_reload:
             import cfv.hash
-            importlib.reload(cfv.hash)  # XXX: hack for environment variable changing
+            # XXX: hack for environment variable changing
+            importlib.reload(cfv.hash)
         cfv_ns = {
             '__name__': '__main__',
             '__file__': cfvfn,
@@ -159,7 +163,7 @@ def runcfv_py(cmd, stdin=None, stdout=None, stderr=None, need_reload=0):
             '__package__': None,
         }
         try:
-            exec (cfv_compiled, cfv_ns)
+            exec(cfv_compiled, cfv_ns)
             s = 'no exit?'
         except SystemExit as e:
             s = e.code
@@ -211,7 +215,8 @@ def setcfv(fn=None, internal=None):
 
     assert os.path.isfile(fn)
     cfvfn = os.path.abspath(fn)
-    _cfv_code = open(cfvfn, 'r').read().replace('\r\n', '\n').replace('\r', '\n')
+    _cfv_code = open(cfvfn, 'r').read().replace(
+        '\r\n', '\n').replace('\r', '\n')
     cfv_compiled = compile(_cfv_code, cfvfn, 'exec')
 
     # This is so that the sys.path modification of the wrapper (if it has one) will be executed..
@@ -245,7 +250,8 @@ def rfind(root, match):
 
 
 def all_unittests_suite():
-    modules_to_test = [os.path.splitext(f)[0].replace(os.sep, '.') for f in rfind(testpath, 'test_*.py')]
+    modules_to_test = [os.path.splitext(f)[0].replace(
+        os.sep, '.') for f in rfind(testpath, 'test_*.py')]
     assert modules_to_test
     alltests = unittest.TestSuite()
     for module in map(my_import, modules_to_test):
@@ -253,7 +259,8 @@ def all_unittests_suite():
 
     import cfv.common
     libdir = os.path.split(cfv.common.__file__)[0]
-    modules_to_doctest = ['cfv.' + os.path.splitext(f)[0].replace(os.sep, '.') for f in rfind(libdir, '*.py')]
+    modules_to_doctest = [
+        'cfv.' + os.path.splitext(f)[0].replace(os.sep, '.') for f in rfind(libdir, '*.py')]
     # TODO: better way to add files in test/ dir to doctest suite?
     modules_to_doctest.append('benchmark')
     assert 'cfv.common' in modules_to_doctest

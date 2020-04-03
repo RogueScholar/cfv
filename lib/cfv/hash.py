@@ -14,7 +14,8 @@ try:
         raise ImportError
     import mmap
 
-    def dommap(fileno, len):  # generic mmap.  ACCESS_* args work on both nix and win.
+    # generic mmap.  ACCESS_* args work on both nix and win.
+    def dommap(fileno, len):
         if len == 0:
             return b''  # mmap doesn't like length=0
         return mmap.mmap(fileno, len, access=mmap.ACCESS_READ)
@@ -100,7 +101,8 @@ try:
             raise ImportError
     except Exception:
         # can't use perror yet since config hasn't been done..
-        sys.stderr.write('old fchksum version installed, using std python modules. please update.\n')
+        sys.stderr.write(
+            'old fchksum version installed, using std python modules. please update.\n')
         raise ImportError
 
     def getfilemd5(filename, callback):

@@ -141,7 +141,8 @@ def decode_dict(x, f, force_sort=True):
     r, f = OrderedDict(), f + 1
 
     while x[f:f + 1] != b'e':
-        k, f = decode_string(x, f, try_decode_utf8=True, force_decode_utf8=True)
+        k, f = decode_string(x, f, try_decode_utf8=True,
+                             force_decode_utf8=True)
         r[k], f = decode_func[x[f:f + 1]](x, f)
 
     if force_sort:
@@ -188,7 +189,8 @@ def bdecode(value):
         raise BencodeDecodeError("not a valid bencoded string")
 
     if l != len(value):
-        raise BencodeDecodeError("invalid bencoded value (data after valid prefix)")
+        raise BencodeDecodeError(
+            "invalid bencoded value (data after valid prefix)")
 
     return r
 

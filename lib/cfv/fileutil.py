@@ -1,11 +1,10 @@
+from cfv import osutil
+from io import BytesIO
+import sys
+import codecs
+from builtins import object
 from future import standard_library
 standard_library.install_aliases()
-from builtins import object
-import codecs
-import sys
-from io import BytesIO
-
-from cfv import osutil
 
 
 _badbytesmarker = u'\ufffe'
@@ -48,7 +47,8 @@ class PeekFile(object):
     def _reset_decodeobj(self):
         self.fileobj.seek(self._decode_start)
         if self._encoding:
-            self.decodeobj = codecs.getreader(self._encoding)(self.fileobj, errors='markbadbytes')
+            self.decodeobj = codecs.getreader(self._encoding)(
+                self.fileobj, errors='markbadbytes')
         self._prevlineend = None
 
     def _readline(self, *args):
@@ -61,7 +61,8 @@ class PeekFile(object):
         if self._encoding:
             badbytecount = line.count(_badbytesmarker)
             if badbytecount:
-                raise UnicodeError('%r codec: %i decode errors' % (self._encoding, badbytecount))
+                raise UnicodeError('%r codec: %i decode errors' %
+                                   (self._encoding, badbytecount))
         return line
 
     def peek(self, *args):
@@ -157,7 +158,8 @@ def open_read(filename, config):
 def open_write(filename, config):
     if config.encoding == 'raw':
         encoding = None
-        mode = 'wb'  # write all files in binary mode. (Otherwise we can run into problems with some encodings, and also with binary files like torrent)
+        # write all files in binary mode. (Otherwise we can run into problems with some encodings, and also with binary files like torrent)
+        mode = 'wb'
     else:
         encoding = config.getencoding()
         mode = 'w'
@@ -166,7 +168,8 @@ def open_write(filename, config):
         import gzip
         import io
         if filename == '-':
-            res = gzip.GzipFile(filename=filename, mode=mode, fileobj=sys.stdout)
+            res = gzip.GzipFile(filename=filename,
+                                mode=mode, fileobj=sys.stdout)
         else:
             res = gzip.open(filename, mode)
         if mode == 'w':
