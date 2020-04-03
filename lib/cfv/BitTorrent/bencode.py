@@ -31,14 +31,14 @@ except ImportError:
     pathlib = None
 
 __all__ = (
-    'BTFailure',
-    'BencodeDecodeError',
-    'bencode',
-    'bdecode',
-    'bread',
-    'bwrite',
-    'encode',
-    'decode'
+    "BTFailure",
+    "BencodeDecodeError",
+    "bencode",
+    "bdecode",
+    "bread",
+    "bwrite",
+    "encode",
+    "decode",
 )
 
 
@@ -54,13 +54,13 @@ BTFailure = BencodeDecodeError
 def decode_int(x, f):
     # type: (bytes, int) -> Tuple[int, int]
     f += 1
-    newf = x.index(b'e', f)
+    newf = x.index(b"e", f)
     n = int(x[f:newf])
 
-    if x[f:f + 1] == b'-':
-        if x[f + 1:f + 2] == b'0':
+    if x[f : f + 1] == b"-":
+        if x[f + 1 : f + 2] == b"0":
             raise ValueError
-    elif x[f:f + 1] == b'0' and newf != f + 1:
+    elif x[f : f + 1] == b"0" and newf != f + 1:
         raise ValueError
 
     return n, newf + 1
@@ -81,18 +81,18 @@ def decode_string(x, f, try_decode_utf8=False, force_decode_utf8=False):
     if you know it should not be a string, you can skip the decoding
     attempt by setting try_decode_utf8=False.
     """
-    colon = x.index(b':', f)
+    colon = x.index(b":", f)
     n = int(x[f:colon])
 
-    if x[f:f + 1] == b'0' and colon != f + 1:
+    if x[f : f + 1] == b"0" and colon != f + 1:
         raise ValueError
 
     colon += 1
-    s = x[colon:colon + n]
+    s = x[colon : colon + n]
 
     if try_decode_utf8:
         try:
-            return s.decode('utf-8'), colon + n
+            return s.decode("utf-8"), colon + n
         except UnicodeDecodeError:
             if force_decode_utf8:
                 raise
@@ -104,8 +104,8 @@ def decode_list(x, f):
     # type: (bytes, int) -> Tuple[List, int]
     r, f = [], f + 1
 
-    while x[f:f + 1] != b'e':
-        v, f = decode_func[x[f:f + 1]](x, f)
+    while x[f : f + 1] != b"e":
+        v, f = decode_func[x[f : f + 1]](x, f)
         r.append(v)
 
     return r, f + 1
@@ -115,7 +115,7 @@ def decode_dict_py26(x, f):
     # type: (bytes, int) -> Tuple[Dict[str, Any], int]
     r, f = {}, f + 1
 
-    while x[f] != 'e':
+    while x[f] != "e":
         k, f = decode_string(x, f)
         r[k], f = decode_func[x[f]](x, f)
 
@@ -140,10 +140,9 @@ def decode_dict(x, f, force_sort=True):
 
     r, f = OrderedDict(), f + 1
 
-    while x[f:f + 1] != b'e':
-        k, f = decode_string(x, f, try_decode_utf8=True,
-                             force_decode_utf8=True)
-        r[k], f = decode_func[x[f:f + 1]](x, f)
+    while x[f : f + 1] != b"e":
+        k, f = decode_string(x, f, try_decode_utf8=True, force_decode_utf8=True)
+        r[k], f = decode_func[x[f : f + 1]](x, f)
 
     if force_sort:
         r = OrderedDict(sorted(r.items()))
@@ -153,23 +152,23 @@ def decode_dict(x, f, force_sort=True):
 
 # noinspection PyDictCreation
 decode_func = {}
-decode_func[b'l'] = decode_list
-decode_func[b'i'] = decode_int
-decode_func[b'0'] = decode_string
-decode_func[b'1'] = decode_string
-decode_func[b'2'] = decode_string
-decode_func[b'3'] = decode_string
-decode_func[b'4'] = decode_string
-decode_func[b'5'] = decode_string
-decode_func[b'6'] = decode_string
-decode_func[b'7'] = decode_string
-decode_func[b'8'] = decode_string
-decode_func[b'9'] = decode_string
+decode_func[b"l"] = decode_list
+decode_func[b"i"] = decode_int
+decode_func[b"0"] = decode_string
+decode_func[b"1"] = decode_string
+decode_func[b"2"] = decode_string
+decode_func[b"3"] = decode_string
+decode_func[b"4"] = decode_string
+decode_func[b"5"] = decode_string
+decode_func[b"6"] = decode_string
+decode_func[b"7"] = decode_string
+decode_func[b"8"] = decode_string
+decode_func[b"9"] = decode_string
 
 if sys.version_info[0] == 2 and sys.version_info[1] == 6:
-    decode_func[b'd'] = decode_dict_py26
+    decode_func[b"d"] = decode_dict_py26
 else:
-    decode_func[b'd'] = decode_dict
+    decode_func[b"d"] = decode_dict
 
 
 def bdecode(value):
@@ -189,14 +188,13 @@ def bdecode(value):
         raise BencodeDecodeError("not a valid bencoded string")
 
     if l != len(value):
-        raise BencodeDecodeError(
-            "invalid bencoded value (data after valid prefix)")
+        raise BencodeDecodeError("invalid bencoded value (data after valid prefix)")
 
     return r
 
 
 class Bencached(object):
-    __slots__ = ['bencoded']
+    __slots__ = ["bencoded"]
 
     def __init__(self, s):
         self.bencoded = s
@@ -209,7 +207,7 @@ def encode_bencached(x, r):
 
 def encode_int(x, r):
     # type: (int, Deque[bytes]) -> None
-    r.extend((b'i', str(x).encode('utf-8'), b'e'))
+    r.extend((b"i", str(x).encode("utf-8"), b"e"))
 
 
 def encode_bool(x, r):
@@ -222,42 +220,42 @@ def encode_bool(x, r):
 
 def encode_bytes(x, r):
     # type: (bytes, Deque[bytes]) -> None
-    r.extend((str(len(x)).encode('utf-8'), b':', x))
+    r.extend((str(len(x)).encode("utf-8"), b":", x))
 
 
 def encode_string(x, r):
     # type: (str, Deque[bytes]) -> None
     try:
-        s = x.encode('utf-8')
+        s = x.encode("utf-8")
     except UnicodeDecodeError:
         encode_bytes(x, r)
         return
 
-    r.extend((str(len(s)).encode('utf-8'), b':', s))
+    r.extend((str(len(s)).encode("utf-8"), b":", s))
 
 
 def encode_list(x, r):
     # type: (List, Deque[bytes]) -> None
-    r.append(b'l')
+    r.append(b"l")
 
     for i in x:
         encode_func[type(i)](i, r)
 
-    r.append(b'e')
+    r.append(b"e")
 
 
 def encode_dict(x, r):
     # type: (Dict, Deque[bytes]) -> None
-    r.append(b'd')
+    r.append(b"d")
     ilist = list(x.items())
     ilist.sort()
 
     for k, v in ilist:
-        k = k.encode('utf-8')
-        r.extend((str(len(k)).encode('utf-8'), b':', k))
+        k = k.encode("utf-8")
+        r.extend((str(len(k)).encode("utf-8"), b":", k))
         encode_func[type(v)](v, r)
 
-    r.append(b'e')
+    r.append(b"e")
 
 
 # noinspection PyDictCreation
@@ -265,7 +263,15 @@ encode_func = {}
 encode_func[Bencached] = encode_bencached
 
 if sys.version_info[0] == 2:
-    from types import DictType, IntType, ListType, LongType, StringType, TupleType, UnicodeType
+    from types import (
+        DictType,
+        IntType,
+        ListType,
+        LongType,
+        StringType,
+        TupleType,
+        UnicodeType,
+    )
 
     encode_func[DictType] = encode_dict
     encode_func[IntType] = encode_int
@@ -312,7 +318,7 @@ def bencode(value):
     encode_func[type(value)](value, r)
 
     # Join parts
-    return b''.join(r)
+    return b"".join(r)
 
 
 # Method proxies (for compatibility with other libraries)
@@ -329,10 +335,10 @@ def bread(fd):
     raised.
     """
     if isinstance(fd, (bytes, str)):
-        with open(fd, 'rb') as fd:
+        with open(fd, "rb") as fd:
             return bdecode(fd.read())
     elif pathlib is not None and isinstance(fd, (pathlib.Path, pathlib.PurePath)):
-        with open(str(fd), 'rb') as fd:
+        with open(str(fd), "rb") as fd:
             return bdecode(fd.read())
     else:
         return bdecode(fd.read())
@@ -347,10 +353,10 @@ def bwrite(data, fd):
     exception raised.
     """
     if isinstance(fd, (bytes, str)):
-        with open(fd, 'wb') as fd:
+        with open(fd, "wb") as fd:
             fd.write(bencode(data))
     elif pathlib is not None and isinstance(fd, (pathlib.Path, pathlib.PurePath)):
-        with open(str(fd), 'wb') as fd:
+        with open(str(fd), "wb") as fd:
             fd.write(bencode(data))
     else:
         fd.write(bencode(data))
