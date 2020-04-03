@@ -1,14 +1,46 @@
+---
+os: linux
+arch: amd64
+dist: bionic
+version: "~> 1.0"
 language: python
+cache:
+  edge: true
+  apt: true
+  pip: true
 
 python:
-  - '2.7'
-  - '3.6'
+  - "3.8"
+  - "3.7"
+  - "3.6"
+  - "2.7"
 
-before_install:
-  - pip install pyroma
-  - pip install check-manifest
-  - pip install flake8
-  - pip install twine
+jobs:
+  fast_finish: true
+
+virtualenv:
+  system_site_packages: true
+
+git:
+  autocrlf: input
+
+addons:
+  apt:
+    dist: bionic
+    update: true
+    sources:
+    - deadsnakes
+    packages:
+    - check-manifest
+    - python-flake8
+    - python-pyroma
+    - python3-flake8
+    - python3-pyroma
+    - twine
+
+install:
+  - pip install -UI --pre pip setuptools
+  - pip install -UI --pre check-manifest flake8 pyroma twine
 
 script:
   - python -m compileall -f .
